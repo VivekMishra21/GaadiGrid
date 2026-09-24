@@ -1,0 +1,41 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+}
+
+.navItem,
+.navItemActive {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.navItemActive {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}

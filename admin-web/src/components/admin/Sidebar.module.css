@@ -1,0 +1,50 @@
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 22px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 12px;
+}
+
+.navItem,
+.navItemActive {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.navItem:hover {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.navItemActive {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.navItemActive svg {
+  color: var(--accent);
+}

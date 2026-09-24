@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: gaadigrid
+          POSTGRES_PASSWORD: gaadigrid_dev
+          POSTGRES_DB: gaadigrid_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gaadigrid"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://gaadigrid:gaadigrid_dev@localhost:5432/gaadigrid_test
+      REDIS_URL: redis://localhost:6379/1
+      ENVIRONMENT: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
+      - name: Lint
+        working-directory: backend
+        run: ruff check app tests
+      - name: Run migrations
+        working-directory: backend
+        run: alembic upgrade head
+      - name: Test
+        working-directory: backend
+        run: pytest -q
+      - name: Docker build
+        run: docker build -t gaadigrid-backend-ci ./backend
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+      - name: Lint
+        working-directory: mobile
+        run: npm run lint
+      - name: Test
+        working-directory: mobile
+        run: npm test -- --watchAll=false
+
+  admin-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        working-directory: admin-web
+        run: npm ci
+      - name: Lint
+        working-directory: admin-web
+        run: npm run lint
+      - name: Test
+        working-directory: admin-web
+        run: npm test
+      - name: Build
+        working-directory: admin-web
+        run: npm run build
+      - name: Docker build
+        run: docker build -t gaadigrid-admin-web-ci --build-arg VITE_API_BASE_URL=https://api.example.com ./admin-web
+
+  provider-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        working-directory: provider-web
+        run: npm ci
+      - name: Lint
+        working-directory: provider-web
+        run: npm run lint
+      - name: Test
+        working-directory: provider-web
+        run: npm test
+      - name: Build
+        working-directory: provider-web
+        run: npm run build
+      - name: Docker build
+        run: docker build -t gaadigrid-provider-web-ci --build-arg VITE_API_BASE_URL=https://api.example.com ./provider-web

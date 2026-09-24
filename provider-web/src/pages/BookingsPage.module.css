@@ -1,0 +1,129 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 20px;
+}
+
+.title {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.packageName {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.meta {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.badge {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badgePending {
+  composes: badge;
+  background: rgba(255, 138, 52, 0.15);
+  color: var(--orange);
+}
+
+.badgeConfirmed,
+.badgeInProgress {
+  composes: badge;
+  background: rgba(24, 168, 117, 0.15);
+  color: var(--green);
+}
+
+.badgeCompleted {
+  composes: badge;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+}
+
+.badgeCancelled,
+.badgeRejected {
+  composes: badge;
+  background: rgba(214, 69, 69, 0.15);
+  color: #e06666;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.btnPrimary {
+  background: var(--green);
+  border: none;
+  color: #0b1b14;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btnDanger {
+  background: none;
+  border: 1px solid #e06666;
+  color: #e06666;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btnSecondary {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}

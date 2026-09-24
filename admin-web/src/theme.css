@@ -1,0 +1,13 @@
+:root {
+  --bg: #102a43;
+  --surface: #16324f;
+  --surface-raised: #1c3b5c;
+  --border: #234868;
+  --text-primary: #eaf0f5;
+  --text-secondary: #9fb2c4;
+  --text-muted: #6c8299;
+  --green: #18a875;
+  --orange: #ff8a34;
+  --accent: var(--green);
+  --accent-muted: #234868;
+}

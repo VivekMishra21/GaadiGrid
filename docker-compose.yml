@@ -1,0 +1,62 @@
+# Compose project name is set explicitly (not derived from the directory name) because another,
+# unrelated GaadiGrid project exists on this machine in a different folder that also happens to be
+# named "gaadigrid" — without this, Docker Compose would treat the two as the same project and their
+# containers/volumes would collide. Do not remove this line.
+name: gaadigrid_customer_app
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: gaadigrid-customer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gaadigrid}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gaadigrid_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-gaadigrid}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - gaadigrid_customer_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gaadigrid}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: gaadigrid-customer-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - gaadigrid_customer_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: gaadigrid-customer-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-gaadigrid}:${POSTGRES_PASSWORD:-gaadigrid_dev}@postgres:5432/${POSTGRES_DB:-gaadigrid}
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+volumes:
+  gaadigrid_customer_postgres_data:
+  gaadigrid_customer_redis_data:

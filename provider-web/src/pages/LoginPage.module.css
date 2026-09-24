@@ -1,0 +1,84 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.brand {
+  margin-bottom: 6px;
+}
+
+.heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.input {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+.error {
+  color: var(--orange);
+  font-size: 13px;
+  margin: 0;
+}
+
+.submit {
+  margin-top: 4px;
+  background: var(--green);
+  color: #0b1b14;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}

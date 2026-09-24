@@ -1,0 +1,49 @@
+<svg width="1600" height="420" viewBox="0 0 1600 420" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>GaadiGrid</title>
+<desc>Location pin mark with fuel nozzle, road and sparkle, the GaadiGrid wordmark, tagline, and a car driving beneath.</desc>
+
+<g transform="translate(50,40) scale(0.34)">
+  <path d="M512,140
+    C 654,140 764,251 764,392
+    C 764,520 640,700 560,830
+    C 542,858 527,884 512,924
+    C 497,884 482,858 464,830
+    C 384,700 260,520 260,392
+    C 260,251 370,140 512,140
+    Z" fill="#102A43"/>
+
+  <g transform="translate(512,340)">
+    <rect x="-96" y="34" width="192" height="46" rx="23" fill="#18A875"/>
+    <rect x="-72" y="46" width="40" height="10" rx="5" fill="#EAF6F0"/>
+    <rect x="-8" y="46" width="40" height="10" rx="5" fill="#EAF6F0"/>
+    <rect x="56" y="46" width="40" height="10" rx="5" fill="#EAF6F0"/>
+
+    <g transform="translate(-48,-94) rotate(-28)" fill="#FF8A34">
+      <rect x="-40" y="-70" width="80" height="50" rx="20"/>
+      <rect x="0" y="-26" width="16" height="34" rx="8"/>
+      <rect x="-16" y="0" width="32" height="130" rx="16"/>
+      <circle cx="0" cy="138" r="11"/>
+    </g>
+
+    <path d="M108,-158 L124,-118 L164,-102 L124,-86 L108,-46 L92,-86 L52,-102 L92,-118 Z" fill="#18A875"/>
+    <path d="M150,-40 L158,-22 L176,-14 L158,-6 L150,12 L142,-6 L124,-14 L142,-22 Z" fill="#18A875" opacity="0.7"/>
+  </g>
+</g>
+
+<text x="392" y="196" font-family="'Segoe UI','Inter',system-ui,sans-serif" font-size="92" font-weight="800" letter-spacing="-1.5" fill="#102A43">GaadiGrid</text>
+
+<text x="395" y="240" font-family="'Segoe UI','Inter',system-ui,sans-serif" font-size="29" font-weight="500" letter-spacing="0.5" fill="#4B5A6B">Fuel. Clean. Care. Drive.</text>
+
+<g transform="translate(395,268)">
+  <rect x="0" y="38" width="230" height="7" rx="3.5" fill="#18A875" opacity="0.35"/>
+  <rect x="0" y="38" width="7" height="7" fill="#18A875"/>
+  <rect x="0" y="38" width="90" height="7" rx="3.5" fill="#18A875"/>
+
+  <g transform="translate(150,0)">
+    <rect x="0" y="22" width="118" height="24" rx="12" fill="#102A43"/>
+    <path d="M22,22 C24,7 33,2 48,2 L74,2 C90,2 99,9 103,22 Z" fill="#102A43"/>
+    <circle cx="26" cy="48" r="11" fill="#102A43"/>
+    <circle cx="92" cy="48" r="11" fill="#102A43"/>
+  </g>
+</g>
+</svg>

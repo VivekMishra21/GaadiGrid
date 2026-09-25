@@ -24,7 +24,7 @@ from app.schemas.fuel_type import FuelTypeOut
 from app.schemas.station import FacilitiesUpdateIn, StationCreateIn, StationDetailOut, StationSummaryOut, StationUpdateIn
 from app.services.audit_service import record_audit_event
 from app.services.exceptions import NotFoundError, ValidationError
-from app.services.queue_status_service import get_station_queue_status
+from app.services.queue_status_service import get_station_queue_status, get_station_queue_statuses
 
 router = APIRouter(prefix="/api/v1/stations", tags=["stations"])
 fuel_types_router = APIRouter(prefix="/api/v1/fuel-types", tags=["fuel-types"])
@@ -52,9 +52,15 @@ def _build_summary(
     distance_km: float | None,
     prices_by_station: dict,
     favorite_ids: set[int],
+    queue_statuses: dict | None = None,
 ) -> StationSummaryOut:
+    """`queue_statuses` lets a caller building a *page* of these (station search,
+    favorites) pass in a batch-fetched dict instead of triggering a fresh queue-status
+    query per station — see the two `get_station_queue_statuses(...)` call sites below.
+    A single-station caller (`get_station`) leaves it None and this fetches it itself,
+    same as before."""
     prices = [_price_to_out(p, ft, _minutes_ago) for p, ft in prices_by_station.get(station.id, [])]
-    queue_status = get_station_queue_status(db, station.id)
+    queue_status = queue_statuses.get(station.id) if queue_statuses is not None else get_station_queue_status(db, station.id)
 
     return StationSummaryOut(
         id=station.id,
@@ -103,8 +109,9 @@ def search_stations(
     station_ids = [s.id for s, _ in results]
     prices_by_station = fuel_price_repository.list_for_stations(db, station_ids)
     favorite_ids = favorite_station_repository.list_station_ids_for_user(db, user.id) if user else set()
+    queue_statuses = get_station_queue_statuses(db, station_ids)
 
-    items = [_build_summary(db, s, dist, prices_by_station, favorite_ids) for s, dist in results]
+    items = [_build_summary(db, s, dist, prices_by_station, favorite_ids, queue_statuses) for s, dist in results]
     return paginate(items, total, page, page_size)
 
 
@@ -116,8 +123,9 @@ def list_my_favorites(db: Session = Depends(get_db), user: User = Depends(get_cu
 
     stations = station_repository.list_by_ids(db, station_ids)
     prices_by_station = fuel_price_repository.list_for_stations(db, [s.id for s in stations])
+    queue_statuses = get_station_queue_statuses(db, [s.id for s in stations])
 
-    return [_build_summary(db, s, None, prices_by_station, station_ids) for s in stations]
+    return [_build_summary(db, s, None, prices_by_station, station_ids, queue_statuses) for s in stations]
 
 
 @router.get("/{station_id}", response_model=StationDetailOut)

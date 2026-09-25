@@ -30,10 +30,24 @@ from app.services.exceptions import ForbiddenError, NotFoundError
 router = APIRouter(prefix="/api/v1/bookings", tags=["bookings"])
 
 
-def _to_out(db: Session, booking: Booking) -> BookingOut:
-    provider = db.get(Provider, booking.provider_id)
-    package = db.get(ServicePackage, booking.package_id)
-    latest_payment = payment_order_repository.get_latest_for_booking(db, booking.id)
+def _to_out(
+    db: Session,
+    booking: Booking,
+    providers_by_id: dict | None = None,
+    packages_by_id: dict | None = None,
+    payments_by_booking: dict | None = None,
+) -> BookingOut:
+    """The three `*_by_*` dicts let a caller building a *page* of these (the booking
+    list endpoints) pass in batch-fetched data instead of triggering three fresh
+    queries per booking — see `_to_out_batch` below. A single-booking caller leaves
+    them None and this fetches everything itself, same as before."""
+    provider = providers_by_id.get(booking.provider_id) if providers_by_id is not None else db.get(Provider, booking.provider_id)
+    package = packages_by_id.get(booking.package_id) if packages_by_id is not None else db.get(ServicePackage, booking.package_id)
+    latest_payment = (
+        payments_by_booking.get(booking.id)
+        if payments_by_booking is not None
+        else payment_order_repository.get_latest_for_booking(db, booking.id)
+    )
     return BookingOut(
         id=booking.id,
         customer_id=booking.customer_id,
@@ -58,6 +72,21 @@ def _to_out(db: Session, booking: Booking) -> BookingOut:
         completed_at=booking.completed_at,
         cancelled_at=booking.cancelled_at,
     )
+
+
+def _to_out_batch(db: Session, bookings: list[Booking]) -> list[BookingOut]:
+    """Batched form of `_to_out` for a whole page of bookings at once — three queries
+    total (providers, packages, latest payment orders) instead of up to three per
+    booking."""
+    provider_ids = {b.provider_id for b in bookings}
+    package_ids = {b.package_id for b in bookings}
+    booking_ids = [b.id for b in bookings]
+
+    providers_by_id = provider_repository.get_by_ids(db, list(provider_ids))
+    packages_by_id = service_package_repository.get_by_ids(db, list(package_ids))
+    payments_by_booking = payment_order_repository.get_latest_for_bookings(db, booking_ids)
+
+    return [_to_out(db, b, providers_by_id, packages_by_id, payments_by_booking) for b in bookings]
 
 
 def _get_bookable_provider_and_package(db: Session, payload: BookingCreateIn) -> tuple[Provider, ServicePackage]:
@@ -100,7 +129,7 @@ def list_my_bookings(
 ):
     offset = (page - 1) * page_size
     items, total = booking_repository.list_for_customer(db, user.id, offset, page_size)
-    return paginate([_to_out(db, b) for b in items], total, page, page_size)
+    return paginate(_to_out_batch(db, items), total, page, page_size)
 
 
 @router.get("/provider/mine", response_model=PaginatedResponse[BookingOut])
@@ -116,7 +145,7 @@ def list_provider_bookings(
 
     offset = (page - 1) * page_size
     items, total = booking_repository.list_for_provider(db, provider.id, offset, page_size)
-    return paginate([_to_out(db, b) for b in items], total, page, page_size)
+    return paginate(_to_out_batch(db, items), total, page, page_size)
 
 
 def _get_booking_for_actor(db: Session, booking_id: int, user: User) -> tuple[Booking, str]:

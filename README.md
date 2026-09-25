@@ -206,7 +206,7 @@ npm run dev                # http://localhost:5174
 ## Running tests
 
 ```bash
-cd backend && venv\Scripts\python -m pytest -q          # 263 tests
+cd backend && venv\Scripts\python -m pytest -q          # 265 tests
 cd mobile && npm test -- --watchAll=false                # 41 tests
 cd admin-web && npm test                                 # 14 tests
 cd provider-web && npm test                               # 5 tests

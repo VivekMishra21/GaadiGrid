@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base, TimestampMixin
@@ -11,7 +11,11 @@ class Review(Base, TimestampMixin):
     provider may reply once via `provider_response`."""
 
     __tablename__ = "reviews"
-    __table_args__ = (UniqueConstraint("booking_id", name="uq_review_booking"),)
+    __table_args__ = (
+        UniqueConstraint("booking_id", name="uq_review_booking"),
+        # Serves `list_for_provider`'s "newest first, scoped to one provider" query.
+        Index("ix_reviews_provider_id_created_at", "provider_id", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     booking_id: Mapped[int] = mapped_column(ForeignKey("bookings.id"), nullable=False, index=True)

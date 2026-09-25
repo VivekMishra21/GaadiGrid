@@ -78,6 +78,34 @@ def test_report_updates_station_queue_status(client, fuel_types, db_session):
     assert res.json()["queue_status"]["queue"]["value"] == "WAIT_10_20"
 
 
+def test_search_results_carry_each_stations_own_queue_status_not_mixed_up(client, fuel_types, db_session):
+    """Regression test for the batched (window-function) queue-status query used by
+    station search/favorites — each station in a page of results must get back its own
+    combined signal, not another station's."""
+    token = _admin_token(client, db_session)
+    station_a = client.post(
+        "/api/v1/stations",
+        json={"name": "Station A", "brand": "Indian Oil", "address": "A", "city": "Noida", "latitude": 28.60, "longitude": 77.30, "is_24_hours": True},
+        headers=auth_header(token),
+    ).json()
+    station_b = client.post(
+        "/api/v1/stations",
+        json={"name": "Station B", "brand": "Shell", "address": "B", "city": "Noida", "latitude": 28.61, "longitude": 77.31, "is_24_hours": True},
+        headers=auth_header(token),
+    ).json()
+
+    customer = signup_customer(client, "+919500000099")
+    headers = auth_header(customer["access_token"])
+    client.post(f"/api/v1/stations/{station_a['id']}/queue-reports", json={"report_type": "NO_QUEUE"}, headers=headers)
+    client.post(f"/api/v1/stations/{station_b['id']}/queue-reports", json={"report_type": "WAIT_30_PLUS"}, headers=headers)
+
+    res = client.get("/api/v1/stations", params={"city": "Noida"})
+    items = {item["id"]: item for item in res.json()["items"]}
+
+    assert items[station_a["id"]]["queue_status"]["queue"]["value"] == "NO_QUEUE"
+    assert items[station_b["id"]]["queue_status"]["queue"]["value"] == "WAIT_30_PLUS"
+
+
 def test_report_rejected_when_reporter_too_far_from_station(client, fuel_types, db_session):
     station = _station(client, db_session)
     customer = signup_customer(client, "+919500000003")

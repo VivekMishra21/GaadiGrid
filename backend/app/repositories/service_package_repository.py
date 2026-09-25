@@ -32,6 +32,15 @@ def get_by_id(db: Session, package_id: int) -> ServicePackage | None:
     return db.get(ServicePackage, package_id)
 
 
+def get_by_ids(db: Session, package_ids: list[int]) -> dict[int, ServicePackage]:
+    """Batched form of `get_by_id` for a known set of ids (e.g. building a page of
+    booking summaries) — one query instead of one per id."""
+    if not package_ids:
+        return {}
+    rows = db.scalars(select(ServicePackage).where(ServicePackage.id.in_(package_ids))).all()
+    return {p.id: p for p in rows}
+
+
 def create(db: Session, data: dict) -> ServicePackage:
     package = ServicePackage(**data)
     db.add(package)

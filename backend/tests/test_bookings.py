@@ -287,3 +287,50 @@ def test_provider_bookings_mine_lists_incoming_booking(client, db_session):
     res = client.get("/api/v1/bookings/provider/mine", headers=auth_header(owner_token))
     assert res.status_code == 200
     assert res.json()["meta"]["total"] == 1
+
+
+def test_customer_bookings_mine_carries_each_bookings_own_details_not_mixed_up(client, db_session):
+    """Regression test for the batched (per-page) provider/package/payment-status
+    lookup `_to_out_batch` uses for booking lists — each booking must get back its own
+    provider name, package name, and payment status, not another booking's."""
+    owner_a_token, provider_a, package_a = _setup_provider(
+        client, db_session, "bk-owner13a@test.dev", {"name": "Package A", "price": 111.0}
+    )
+    owner_b_token, provider_b, package_b = _setup_provider(
+        client, db_session, "bk-owner13b@test.dev", {"name": "Package B", "price": 222.0}
+    )
+    customer = signup_customer(client, "+919700000016")
+    cust_token = customer["access_token"]
+    vehicle = create_vehicle(client, cust_token)
+    address = create_address(client, cust_token)
+
+    slot_a = _first_slot(client, provider_a["id"], package_a["id"])
+    booking_a = client.post(
+        "/api/v1/bookings",
+        json={"package_id": package_a["id"], "vehicle_id": vehicle["id"], "address_id": address["id"], "scheduled_at": slot_a},
+        headers=auth_header(cust_token),
+    ).json()
+
+    slot_b = _first_slot(client, provider_b["id"], package_b["id"])
+    booking_b = client.post(
+        "/api/v1/bookings",
+        json={"package_id": package_b["id"], "vehicle_id": vehicle["id"], "address_id": address["id"], "scheduled_at": slot_b},
+        headers=auth_header(cust_token),
+    ).json()
+
+    # Confirm and pay for booking A only, so the two bookings end up with different
+    # payment_status values too — the batched payment-order lookup must not cross them.
+    client.post(f"/api/v1/bookings/{booking_a['id']}/confirm", headers=auth_header(owner_a_token))
+    order = client.post(f"/api/v1/bookings/{booking_a['id']}/payment", headers=auth_header(cust_token)).json()
+    client.post(f"/api/v1/payments/{order['id']}/dev-complete", headers=auth_header(cust_token))
+
+    res = client.get("/api/v1/bookings/mine", headers=auth_header(cust_token))
+    items = {item["id"]: item for item in res.json()["items"]}
+
+    assert items[booking_a["id"]]["provider_name"] == provider_a["business_name"]
+    assert items[booking_a["id"]]["package_name"] == "Package A"
+    assert items[booking_a["id"]]["payment_status"] == "PAID"
+
+    assert items[booking_b["id"]]["provider_name"] == provider_b["business_name"]
+    assert items[booking_b["id"]]["package_name"] == "Package B"
+    assert items[booking_b["id"]]["payment_status"] is None

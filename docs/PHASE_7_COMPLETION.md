@@ -32,7 +32,8 @@ including one critical).
 **7 new backend tests** cover the auth changes specifically (cookie is set on login, refresh works from the
 cookie alone with no body token, refresh is rejected with neither, refresh is rate-limited, logout clears the
 cookie and genuinely revokes the token server-side), the station audit-logging fix, and the staff-management
-privilege restriction.
+privilege restriction. (Two more tests, covering the performance-batching correctness fixes below, bring the
+phase's total to 9 new tests.)
 
 Not fixed, and why: `python-jose` (the JWT library) is old and effectively unmaintained upstream, but
 `decode_token` always passes an explicit `algorithms=["HS256"]` allowlist, so the historical algorithm-confusion
@@ -60,18 +61,32 @@ endpoints, redundant queries within a request, and the PostGIS geo-search query 
 - **Missing indexes on `notifications`**: `list_for_user` and `unread_count`/`unread_only` both filter by
   `user_id` and then sort/filter by `created_at`/`read_at`, neither of which was indexed. New composite indexes
   `(user_id, created_at)` and `(user_id, read_at)` (migration `262ba4479d09`).
+- **Station search's queue-status lookup** (`_build_summary` → `get_station_queue_status`) ran once per station
+  in a page of results. New `queue_status_service.get_station_queue_statuses` batches it with a window function
+  (ranks each station's reports, keeps the top 200 per station — the same cap the single-station version always
+  applied), used by both station search and favorites.
+- **Booking list responses** (`_to_out`) fetched the provider, package, and latest payment order individually
+  per booking. New `_to_out_batch` (`app/routers/bookings.py`) batches all three per page, via new
+  `provider_repository.get_by_ids`, `service_package_repository.get_by_ids`, and
+  `payment_order_repository.get_latest_for_bookings` (the last via the same window-function pattern as the
+  queue-status fix).
+- **Missing indexes on `reviews`/`disputes`**: added `(provider_id, created_at)` on `reviews` (serves the public
+  reviews list) and `(status, created_at)` on `disputes` (serves the admin disputes list, which always filters
+  by status) — migration `10183b1f6b80`.
 
 Confirmed already solid: pagination is used correctly everywhere it matters; every foreign key has an index;
 every status/verification column used in a `WHERE` clause is indexed; the PostGIS distance query is
 textbook-correct (`ST_DWithin` as a filter, `ST_Distance` only for `ORDER BY`, in both the count and data
 queries).
 
-Identified but **not** fixed this phase, documented as known follow-ups rather than rushed: a similar N+1 in
-station search's queue-status lookup (`_build_summary` calls `get_station_queue_status` once per station in the
-results), and in booking list responses (`_to_out` fetches provider/package/payment-order per booking) — both
-would need a new batching helper threaded through code that's already been live-verified extensively across
-three phases, and the risk of touching it outweighed the benefit at current data volumes. Revisit if either
-endpoint's response time becomes a real problem.
+The last three of the above (queue-status batching, booking-list batching, reviews/disputes indexes) were
+initially scoped as "identified but not fixed — the risk of touching code already live-verified across several
+phases outweighed the benefit at current data volumes" and documented as known follow-ups in the risks doc.
+They were closed in a later pass, each with a dedicated regression test proving the batched query returns the
+*correct* per-row data — not just that it runs — since that's the actual risk a window-function refactor
+carries (mixing up one row's data with another's), not whether it executes without error:
+`test_search_results_carry_each_stations_own_queue_status_not_mixed_up` and
+`test_customer_bookings_mine_carries_each_bookings_own_details_not_mixed_up`.
 
 ## Accessibility
 
@@ -109,7 +124,7 @@ consistent with every other phase's documented scope boundaries.
 
 ## Verification performed
 
-- `pytest -q` (backend) — **263/263 passing** (7 new Phase 7 tests + all 256 Phase 1–6 tests still passing).
+- `pytest -q` (backend) — **265/265 passing** (9 new Phase 7 tests + all 256 Phase 1–6 tests still passing).
 - `ruff check app tests` (backend) — 0 errors.
 - `alembic check` — no drift after applying the notification-indexes migration.
 - `npm audit` (admin-web, provider-web) — 0 vulnerabilities (down from 5, including 1 critical).

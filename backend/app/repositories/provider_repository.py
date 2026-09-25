@@ -31,6 +31,17 @@ def get_by_id(db: Session, provider_id: int) -> Provider | None:
     return provider
 
 
+def get_by_ids(db: Session, provider_ids: list[int]) -> dict[int, Provider]:
+    """Batched form of `get_by_id` for a known set of ids (e.g. building a page of
+    booking summaries) — one query instead of one per id."""
+    if not provider_ids:
+        return {}
+    rows = db.scalars(
+        select(Provider).where(Provider.id.in_(provider_ids), Provider.deleted_at.is_(None))
+    ).all()
+    return {p.id: p for p in rows}
+
+
 def get_by_owner(db: Session, owner_user_id: int) -> Provider | None:
     return db.scalars(
         select(Provider).where(Provider.owner_user_id == owner_user_id, Provider.deleted_at.is_(None))

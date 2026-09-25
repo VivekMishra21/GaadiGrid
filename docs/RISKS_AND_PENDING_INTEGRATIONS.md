@@ -54,20 +54,26 @@ target to act on, or was a deliberate scope boundary.
       `SameSite=None` (still `Secure`) in `backend/app/routers/auth.py`'s `_set_refresh_cookie` — see
       `docs/DEPLOYMENT.md`.
 
-## Known performance follow-ups (Phase 7)
+## Performance follow-ups from Phase 7's audit — now closed
 
-Phase 7's performance audit (see `docs/PHASE_7_COMPLETION.md`) fixed the highest-value N+1 queries and missing
-indexes it found. Two lower-priority N+1 patterns were identified but deliberately not touched, since fixing them
-means changing code that's already been live-verified across multiple earlier phases, for a benefit that isn't
-worth that risk at current data volumes:
+Phase 7's performance audit found three lower-priority N+1/index gaps beyond the ones fixed in the initial pass,
+initially left as documented follow-ups since fixing them meant touching code already live-verified across
+several earlier phases. All three have since been closed, each with a dedicated regression test proving the
+batched query returns the *correct* per-row data (not another row's), not just that it runs:
 
-- [ ] Station search's queue-status lookup (`app/routers/stations.py::_build_summary` → `get_station_queue_status`)
-      runs once per station in a page of results instead of being batched.
-- [ ] Booking list responses (`app/routers/bookings.py::_to_out`) fetch the provider, package, and latest payment
-      order individually per booking instead of batched per page.
-- [ ] `reviews`/`disputes` don't have the same `(scope_id, created_at)` composite indexes `notifications` just
-      got — lower priority since neither table grows anywhere near as fast (disputes are rare by design; reviews
-      cap at one per booking), but worth adding if either listing becomes slow.
+- [x] ~~Station search's queue-status lookup ran once per station in a page of results.~~ Fixed:
+      `queue_status_service.get_station_queue_statuses` batches it with a window function (ranks each station's
+      reports, keeps the top 200 per station — same cap the single-station version always had), used by both
+      station search and favorites. Regression test:
+      `test_search_results_carry_each_stations_own_queue_status_not_mixed_up`.
+- [x] ~~Booking list responses fetched the provider, package, and latest payment order individually per
+      booking.~~ Fixed: `bookings.py::_to_out_batch` batches all three per page (new `provider_repository.get_by_ids`,
+      `service_package_repository.get_by_ids`, `payment_order_repository.get_latest_for_bookings` — the last via
+      the same window-function pattern). Regression test:
+      `test_customer_bookings_mine_carries_each_bookings_own_details_not_mixed_up`.
+- [x] ~~`reviews`/`disputes` didn't have the same kind of composite index `notifications` got.~~ Fixed: added
+      `(provider_id, created_at)` on `reviews` (serves the public reviews list) and `(status, created_at)` on
+      `disputes` (serves the admin disputes list, which always filters by status) — migration `10183b1f6b80`.
 
 ## Data model gaps intentional to Phases 1–6
 

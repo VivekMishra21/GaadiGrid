@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base, TimestampMixin
@@ -21,6 +21,11 @@ class Dispute(Base, TimestampMixin):
     resolve or dismiss one."""
 
     __tablename__ = "disputes"
+    __table_args__ = (
+        # Serves the admin disputes list (`list_all`), which always filters by status
+        # (defaults to "OPEN") and orders newest-first.
+        Index("ix_disputes_status_created_at", "status", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     booking_id: Mapped[int] = mapped_column(ForeignKey("bookings.id"), nullable=False, index=True)

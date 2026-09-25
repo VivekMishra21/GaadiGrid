@@ -136,7 +136,19 @@ def combine_reports(
 
 
 def get_station_queue_status(db: Session, station_id: int) -> StationQueueStatusOut:
+    return get_station_queue_statuses(db, [station_id]).get(
+        station_id, combine_reports([], now=datetime.now(timezone.utc))
+    )
+
+
+def get_station_queue_statuses(db: Session, station_ids: list[int]) -> dict[int, StationQueueStatusOut]:
+    """Batched form of `get_station_queue_status` for a whole page of stations at once
+    (station search, favorites) — one query total instead of one per station. Uses a
+    window function to preserve the same "most recent 200 reports per station" cap the
+    single-station version applies, rather than an unbounded fetch."""
     cutoff = datetime.now(timezone.utc)
+    if not station_ids:
+        return {}
 
     flag_counts_subquery = (
         select(QueueReportFlag.queue_report_id, func.count(QueueReportFlag.id).label("flag_count"))
@@ -144,27 +156,33 @@ def get_station_queue_status(db: Session, station_id: int) -> StationQueueStatus
         .subquery()
     )
 
-    rows = db.execute(
+    ranked = (
         select(
+            QueueReport.station_id,
             QueueReport.report_type,
             QueueReport.created_at,
             QueueReport.is_verified_partner_report,
             func.coalesce(flag_counts_subquery.c.flag_count, 0).label("flag_count"),
+            func.row_number()
+            .over(partition_by=QueueReport.station_id, order_by=QueueReport.created_at.desc())
+            .label("rank"),
         )
         .outerjoin(flag_counts_subquery, flag_counts_subquery.c.queue_report_id == QueueReport.id)
-        .where(QueueReport.station_id == station_id)
-        .order_by(QueueReport.created_at.desc())
-        .limit(200)
-    ).all()
+        .where(QueueReport.station_id.in_(station_ids))
+        .subquery()
+    )
 
-    reports = [
-        {
-            "report_type": row.report_type,
-            "created_at": row.created_at.replace(tzinfo=timezone.utc) if row.created_at.tzinfo is None else row.created_at,
-            "is_verified_partner_report": row.is_verified_partner_report,
-            "flag_count": row.flag_count,
-        }
-        for row in rows
-    ]
+    rows = db.execute(select(ranked).where(ranked.c.rank <= 200)).all()
 
-    return combine_reports(reports, now=cutoff)
+    reports_by_station: dict[int, list[dict]] = {sid: [] for sid in station_ids}
+    for row in rows:
+        reports_by_station[row.station_id].append(
+            {
+                "report_type": row.report_type,
+                "created_at": row.created_at.replace(tzinfo=timezone.utc) if row.created_at.tzinfo is None else row.created_at,
+                "is_verified_partner_report": row.is_verified_partner_report,
+                "flag_count": row.flag_count,
+            }
+        )
+
+    return {sid: combine_reports(reports, now=cutoff) for sid, reports in reports_by_station.items()}

@@ -61,6 +61,17 @@ export function ProvidersPage() {
     }
   }
 
+  async function handleToggleSponsored(provider) {
+    setActionError(null);
+    try {
+      const action = provider.is_sponsored ? 'unsponsor' : 'sponsor';
+      await api.post(`/api/v1/admin/providers/${provider.id}/${action}`);
+      load();
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : 'Failed to update sponsorship');
+    }
+  }
+
   const providers = data?.items || [];
   const meta = data?.meta;
 
@@ -157,6 +168,11 @@ export function ProvidersPage() {
                       <span className={tableStyles.badge} style={{ color: p.is_active ? undefined : 'var(--orange)' }}>
                         {p.is_active ? 'Active' : 'Inactive'}
                       </span>
+                      {p.is_sponsored ? (
+                        <span className={tableStyles.badge} style={{ color: 'var(--orange)', marginLeft: 6 }}>
+                          Sponsored
+                        </span>
+                      ) : null}
                     </td>
                     <td style={{ whiteSpace: 'nowrap' }}>
                       {p.verification_status === 'PENDING' ? (
@@ -169,6 +185,9 @@ export function ProvidersPage() {
                           </button>
                         </>
                       ) : null}
+                      <button onClick={() => handleToggleSponsored(p)} style={actionBtnStyle('var(--orange)')}>
+                        {p.is_sponsored ? 'Unsponsor' : 'Sponsor'}
+                      </button>
                       <button onClick={() => handleToggleActive(p)} style={actionBtnStyle('var(--text-secondary)')}>
                         {p.is_active ? 'Deactivate' : 'Reactivate'}
                       </button>

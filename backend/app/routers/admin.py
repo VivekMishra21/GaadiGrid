@@ -143,6 +143,35 @@ def reactivate_provider(
     return _provider_manager_detail(db, provider)
 
 
+@router.post("/providers/{provider_id}/sponsor", response_model=ProviderManagerDetailOut)
+def sponsor_provider(
+    provider_id: int, db: Session = Depends(get_db), admin=Depends(require_roles(*Role.ADMIN_ROLES))
+):
+    """Marks a provider as a paid/sponsored placement — customer-facing search still
+    only returns it when it actually matches the query; this just orders it first
+    among matches and shows the "Sponsored" badge (ProviderSummaryOut.is_sponsored)."""
+    provider = provider_repository.get_by_id(db, provider_id)
+    if provider is None:
+        raise NotFoundError("Provider not found.")
+    provider = provider_repository.update(db, provider, {"is_sponsored": True})
+    record_audit_event(db, action="provider.sponsor", actor_user_id=admin.id, target_type="provider", target_id=str(provider_id))
+
+    return _provider_manager_detail(db, provider)
+
+
+@router.post("/providers/{provider_id}/unsponsor", response_model=ProviderManagerDetailOut)
+def unsponsor_provider(
+    provider_id: int, db: Session = Depends(get_db), admin=Depends(require_roles(*Role.ADMIN_ROLES))
+):
+    provider = provider_repository.get_by_id(db, provider_id)
+    if provider is None:
+        raise NotFoundError("Provider not found.")
+    provider = provider_repository.update(db, provider, {"is_sponsored": False})
+    record_audit_event(db, action="provider.unsponsor", actor_user_id=admin.id, target_type="provider", target_id=str(provider_id))
+
+    return _provider_manager_detail(db, provider)
+
+
 @router.get("/disputes", response_model=PaginatedResponse[DisputeOut])
 def list_disputes(
     status: str | None = None,

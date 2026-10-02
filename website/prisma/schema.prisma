@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model WaitlistSignup {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  city      String?
+  vehicleType String?
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model PartnerEnquiry {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  businessName  String
+  contactName   String
+  phone         String
+  email         String
+  businessType  String
+  city          String
+  message       String?
+  createdAt     DateTime @default(now())
+}

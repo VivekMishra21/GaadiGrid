@@ -33,6 +33,17 @@ def list_for_provider(db: Session, provider_id: int, offset: int, limit: int) ->
     return list(items), int(total or 0)
 
 
+def count_by_status_for_provider(db: Session, provider_id: int) -> dict[str, int]:
+    """Booking counts grouped by status for one provider — the raw data behind the
+    provider-facing bookings/cancellations report (booking_service.build_provider_report)."""
+    rows = db.execute(
+        select(Booking.status, func.count(Booking.id))
+        .where(Booking.provider_id == provider_id)
+        .group_by(Booking.status)
+    ).all()
+    return {status: int(count) for status, count in rows}
+
+
 def list_active_for_provider_on_date(db: Session, provider_id: int, target_date: date) -> list[Booking]:
     """Non-terminal bookings for this provider whose scheduled_at falls on
     target_date (interpreted as an IST calendar day, matching provider availability

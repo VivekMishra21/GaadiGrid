@@ -6,7 +6,7 @@ GaadiGrid helps vehicle owners find petrol, diesel, CNG and EV stations; view fu
 information; calculate whether travelling to a cheaper station is worth it; book car-cleaning and vehicle-care
 services; pay online; and manage vehicle-related reminders and expenses.
 
-This is a monorepo containing four connected applications:
+This is a monorepo containing five connected applications:
 
 ```
 gaadigrid/
@@ -14,11 +14,16 @@ gaadigrid/
 ├── admin-web/       Admin portal — React + Vite (JavaScript)
 ├── provider-web/    Partner portal — React + Vite (JavaScript)
 ├── backend/         Shared API — FastAPI + PostgreSQL/PostGIS + Redis
+├── website/         Marketing/landing site — Next.js + TypeScript + MongoDB/Prisma (standalone, see below)
 ├── branding/        Logo source files
 ├── docs/            Phase reports, risk log
 ├── docker-compose.yml
 └── README.md
 ```
+
+`website/` is intentionally independent of `backend/`: it's a separate Next.js app with its own
+Route Handler REST API and its own MongoDB database (via Prisma), not connected to the
+PostgreSQL data used by the other four apps. See [`website/README.md`](website/README.md).
 
 > **Status: Phase 7 of 7 complete.** See [`docs/PHASE_1_COMPLETION.md`](docs/PHASE_1_COMPLETION.md),
 > [`docs/PHASE_2_COMPLETION.md`](docs/PHASE_2_COMPLETION.md), [`docs/PHASE_3_COMPLETION.md`](docs/PHASE_3_COMPLETION.md),

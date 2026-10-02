@@ -158,6 +158,9 @@ export function BookingScreen({ route, navigation }) {
                   key={isoDate(d)}
                   onPress={() => setSelectedDate(d)}
                   style={[styles.dayChip, active && styles.dayChipActive]}
+                  accessibilityRole="radio"
+                  accessibilityLabel={formatDayLabel(d)}
+                  accessibilityState={{ selected: active, checked: active }}
                 >
                   <Text style={[styles.dayChipText, active && styles.dayChipTextActive]}>{formatDayLabel(d)}</Text>
                 </TouchableOpacity>
@@ -180,7 +183,14 @@ export function BookingScreen({ route, navigation }) {
             {slots.map((slot) => {
               const active = slot === selectedSlot;
               return (
-                <TouchableOpacity key={slot} onPress={() => setSelectedSlot(slot)} style={[styles.slotChip, active && styles.slotChipActive]}>
+                <TouchableOpacity
+                  key={slot}
+                  onPress={() => setSelectedSlot(slot)}
+                  style={[styles.slotChip, active && styles.slotChipActive]}
+                  accessibilityRole="radio"
+                  accessibilityLabel={formatSlotLabel(slot)}
+                  accessibilityState={{ selected: active, checked: active }}
+                >
                   <Text style={[styles.slotChipText, active && styles.slotChipTextActive]}>{formatSlotLabel(slot)}</Text>
                 </TouchableOpacity>
               );

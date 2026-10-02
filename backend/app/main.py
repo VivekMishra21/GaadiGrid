@@ -14,10 +14,12 @@ from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.bookings import router as bookings_router
 from app.routers.expenses import router as expenses_router
+from app.routers.fleet import router as fleet_router
 from app.routers.health import router as health_router
 from app.routers.notifications import router as notifications_router
 from app.routers.payments import router as payments_router
 from app.routers.payments import webhook_router as payments_webhook_router
+from app.routers.pit_stop import router as pit_stop_router
 from app.routers.providers import router as providers_router
 from app.routers.queue_reports import flags_router as queue_report_flags_router
 from app.routers.queue_reports import router as queue_reports_router
@@ -120,3 +122,5 @@ app.include_router(settlements_router)
 app.include_router(admin_settlements_router)
 app.include_router(expenses_router)
 app.include_router(notifications_router)
+app.include_router(fleet_router)
+app.include_router(pit_stop_router)

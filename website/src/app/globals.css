@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-fraunces), Georgia, serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-brand-green: var(--brand-green);
+  --color-brand-orange: var(--brand-orange);
+  --color-brand-error: var(--brand-error);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* GaadiGrid brand palette (mobile/src/theme/colors.js) — this site is permanently
+   dark-navy, matching the app's established identity, so there is no light variant. */
+:root {
+  --background: #102a43;
+  --foreground: #eaf0f5;
+  --card: #16324f;
+  --card-foreground: #eaf0f5;
+  --popover: #1c3b5c;
+  --popover-foreground: #eaf0f5;
+  --primary: #18a875;
+  --primary-foreground: #0b1b14;
+  --secondary: #1c3b5c;
+  --secondary-foreground: #eaf0f5;
+  --muted: #16324f;
+  --muted-foreground: #9fb2c4;
+  --accent: #ff8a34;
+  --accent-foreground: #1c0d00;
+  --destructive: #d64545;
+  --border: #234868;
+  --input: #234868;
+  --ring: #18a875;
+  --chart-1: #18a875;
+  --chart-2: #ff8a34;
+  --chart-3: #9fb2c4;
+  --chart-4: #6c8299;
+  --chart-5: #d64545;
+  --radius: 0.75rem;
+  --sidebar: #16324f;
+  --sidebar-foreground: #eaf0f5;
+  --sidebar-primary: #18a875;
+  --sidebar-primary-foreground: #0b1b14;
+  --sidebar-accent: #1c3b5c;
+  --sidebar-accent-foreground: #eaf0f5;
+  --sidebar-border: #234868;
+  --sidebar-ring: #18a875;
+
+  --brand-green: #18a875;
+  --brand-orange: #ff8a34;
+  --brand-error: #d64545;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1,
+  h2 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+}

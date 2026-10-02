@@ -18,7 +18,7 @@ from app.repositories import (
     review_repository,
     service_package_repository,
 )
-from app.schemas.booking import BookingActionIn, BookingCreateIn, BookingOut
+from app.schemas.booking import BookingActionIn, BookingCreateIn, BookingOut, ProviderBookingReportOut
 from app.schemas.common import PaginatedResponse, paginate
 from app.schemas.dispute import DisputeCreateIn, DisputeOut
 from app.schemas.review import ReviewCreateIn, ReviewOut, ReviewResponseIn
@@ -146,6 +146,18 @@ def list_provider_bookings(
     offset = (page - 1) * page_size
     items, total = booking_repository.list_for_provider(db, provider.id, offset, page_size)
     return paginate(_to_out_batch(db, items), total, page, page_size)
+
+
+@router.get("/provider/mine/report", response_model=ProviderBookingReportOut)
+def get_provider_booking_report(
+    db: Session = Depends(get_db), user: User = Depends(require_roles(*Role.PROVIDER_ROLES))
+):
+    provider = provider_repository.get_by_owner_or_staff(db, user.id)
+    if provider is None:
+        return ProviderBookingReportOut(
+            total_bookings=0, by_status={}, cancelled_count=0, rejected_count=0, completed_count=0, cancellation_rate=0.0
+        )
+    return booking_service.build_provider_report(db, provider.id)
 
 
 def _get_booking_for_actor(db: Session, booking_id: int, user: User) -> tuple[Booking, str]:

@@ -121,8 +121,20 @@ export function StationDetailScreen({ route, navigation }) {
           <Text style={styles.address}>{station.address}</Text>
           <Text style={styles.hours}>{station.is_24_hours ? 'Open 24 hours' : `${station.opens_at || '?'} - ${station.closes_at || '?'}`}</Text>
         </View>
-        <TouchableOpacity onPress={handleFavorite} disabled={favoriteBusy} accessibilityRole="button">
-          <Text style={[styles.favoriteStar, station.is_favorite && styles.favoriteStarActive]}>★</Text>
+        <TouchableOpacity
+          onPress={handleFavorite}
+          disabled={favoriteBusy}
+          accessibilityRole="button"
+          accessibilityLabel={station.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+          accessibilityState={{ selected: station.is_favorite, disabled: favoriteBusy }}
+        >
+          <Text
+            style={[styles.favoriteStar, station.is_favorite && styles.favoriteStarActive]}
+            accessibilityElementsHidden
+            importantForAccessibility="no"
+          >
+            ★
+          </Text>
         </TouchableOpacity>
       </View>
 

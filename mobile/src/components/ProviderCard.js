@@ -3,15 +3,25 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { colors } from '../theme/colors';
 
 export function ProviderCard({ provider, onPress }) {
+  const label = [
+    provider.business_name,
+    provider.verification_status === 'VERIFIED' ? 'Verified business' : null,
+    provider.locality ? `${provider.locality}, ${provider.city}` : provider.city,
+    provider.review_count > 0 ? `Rated ${provider.average_rating.toFixed(1)} out of 5, ${provider.review_count} reviews` : null,
+    provider.description || null,
+  ]
+    .filter(Boolean)
+    .join('. ');
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} accessibilityRole="button">
-      <View style={styles.header}>
+    <TouchableOpacity style={styles.card} onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+      <View style={styles.header} importantForAccessibility="no-hide-descendants">
         <Text style={styles.name} numberOfLines={1}>
           {provider.business_name}
         </Text>
         {provider.verification_status === 'VERIFIED' ? <Text style={styles.verifiedBadge}>Verified</Text> : null}
       </View>
-      <View style={styles.metaRow}>
+      <View style={styles.metaRow} importantForAccessibility="no-hide-descendants">
         <Text style={styles.address} numberOfLines={1}>
           {provider.locality ? `${provider.locality}, ${provider.city}` : provider.city}
         </Text>
@@ -20,7 +30,7 @@ export function ProviderCard({ provider, onPress }) {
         ) : null}
       </View>
       {provider.description ? (
-        <Text style={styles.description} numberOfLines={2}>
+        <Text style={styles.description} numberOfLines={2} importantForAccessibility="no-hide-descendants">
           {provider.description}
         </Text>
       ) : null}

@@ -49,3 +49,8 @@ class Provider(Base, TimestampMixin, SoftDeleteMixin):
     verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    # A clearly-labelled paid placement (see ProviderSummaryOut.is_sponsored and the
+    # "Sponsored" badge shown wherever providers are listed) — never hides or replaces
+    # organic results, only orders a matching provider earlier within them.
+    is_sponsored: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)

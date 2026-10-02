@@ -20,6 +20,14 @@ def list_all_active(db: Session) -> list[Vehicle]:
     return list(db.scalars(select(Vehicle).where(Vehicle.deleted_at.is_(None))).all())
 
 
+def list_by_fleet_account(db: Session, fleet_account_id: int) -> list[Vehicle]:
+    return list(
+        db.scalars(
+            select(Vehicle).where(Vehicle.fleet_account_id == fleet_account_id, Vehicle.deleted_at.is_(None))
+        ).all()
+    )
+
+
 def get_by_id(db: Session, vehicle_id: int) -> Vehicle | None:
     vehicle = db.get(Vehicle, vehicle_id)
     if vehicle is not None and vehicle.deleted_at is not None:

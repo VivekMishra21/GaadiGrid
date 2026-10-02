@@ -4,6 +4,7 @@ from app.models.booking import Booking  # noqa: F401
 from app.models.dispute import Dispute  # noqa: F401
 from app.models.expense import Expense  # noqa: F401
 from app.models.favorite_station import FavoriteStation  # noqa: F401
+from app.models.fleet_account import FleetAccount, FleetMember  # noqa: F401
 from app.models.fuel_availability import FuelAvailability  # noqa: F401
 from app.models.fuel_price import FuelPrice  # noqa: F401
 from app.models.fuel_station import FuelStation  # noqa: F401

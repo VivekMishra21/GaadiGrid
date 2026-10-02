@@ -12,9 +12,22 @@ export function StationCard({ station, onPress }) {
   const cheapest = cheapestPrice(station.prices);
   const queue = station.queue_status?.queue;
 
+  const priceLabel = cheapest ? `${cheapest.fuel_type_code} ₹${cheapest.price.toFixed(2)}` : 'No prices yet';
+  const queueLabel = queue?.value ? `${queue.label}, reported ${queue.last_reported_minutes_ago} minutes ago` : 'No recent queue reports';
+  const label = [
+    station.name,
+    station.locality ? `${station.locality}, ${station.city}` : station.city,
+    station.is_favorite ? 'Favorited' : null,
+    station.distance_km != null ? `${station.distance_km} km away` : null,
+    priceLabel,
+    queueLabel,
+  ]
+    .filter(Boolean)
+    .join('. ');
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} accessibilityRole="button">
-      <View style={styles.header}>
+    <TouchableOpacity style={styles.card} onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+      <View style={styles.header} importantForAccessibility="no-hide-descendants">
         <View style={styles.titleBlock}>
           <Text style={styles.name} numberOfLines={1}>
             {station.name}
@@ -26,7 +39,7 @@ export function StationCard({ station, onPress }) {
         {station.is_favorite ? <Text style={styles.favoriteStar}>★</Text> : null}
       </View>
 
-      <View style={styles.metaRow}>
+      <View style={styles.metaRow} importantForAccessibility="no-hide-descendants">
         {station.distance_km != null ? <Text style={styles.distance}>{station.distance_km} km away</Text> : null}
         {cheapest ? (
           <Text style={styles.price}>
@@ -37,7 +50,7 @@ export function StationCard({ station, onPress }) {
         )}
       </View>
 
-      <View style={styles.queueRow}>
+      <View style={styles.queueRow} importantForAccessibility="no-hide-descendants">
         {queue?.value ? (
           <>
             <View style={[styles.dot, { backgroundColor: queueSignalColor(queue.value) }]} />

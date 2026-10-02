@@ -40,3 +40,17 @@ class BookingOut(BaseModel):
     cancelled_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ProviderBookingReportOut(BaseModel):
+    """Booking-volume and cancellation reporting for a provider — revenue itself
+    (gross/commission/net) is already reported per-booking via the settlements
+    endpoints; this covers the booking-status side settlements don't (pending,
+    rejected, cancelled bookings never generate a settlement row)."""
+
+    total_bookings: int
+    by_status: dict[str, int]
+    cancelled_count: int
+    rejected_count: int
+    completed_count: int
+    cancellation_rate: float = Field(description="cancelled bookings / total bookings, 0 if no bookings yet")

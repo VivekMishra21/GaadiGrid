@@ -11,6 +11,10 @@ def _point_wkt(lat: float, lng: float) -> str:
     return f"SRID=4326;POINT({lng} {lat})"
 
 
+def _line_wkt(origin_lat: float, origin_lng: float, dest_lat: float, dest_lng: float) -> str:
+    return f"SRID=4326;LINESTRING({origin_lng} {origin_lat}, {dest_lng} {dest_lat})"
+
+
 def create(db: Session, data: dict) -> FuelStation:
     station = FuelStation(**data, location=func.ST_GeogFromText(_point_wkt(data["latitude"], data["longitude"])))
     db.add(station)
@@ -114,3 +118,33 @@ def search(
     query = query.order_by(FuelStation.name.asc()).offset(offset).limit(limit)
     items = db.scalars(query).all()
     return [(s, None) for s in items], int(total or 0)
+
+
+def search_along_route(
+    db: Session,
+    origin_lat: float,
+    origin_lng: float,
+    dest_lat: float,
+    dest_lng: float,
+    buffer_km: float,
+    limit: int,
+) -> list[tuple[FuelStation, float]]:
+    """Stations within `buffer_km` of the straight geodesic line between origin and
+    destination — genuinely computed via PostGIS (ST_DWithin/ST_Distance against a
+    LINESTRING geography), not road-following. Smart Pit Stop labels this honestly as
+    a straight-line corridor since no turn-by-turn routing provider is configured."""
+    route = func.ST_GeogFromText(_line_wkt(origin_lat, origin_lng, dest_lat, dest_lng))
+    distance_col = (geo_func.ST_Distance(FuelStation.location, route) / 1000).label("distance_km")
+
+    query = (
+        select(FuelStation, distance_col)
+        .where(
+            FuelStation.deleted_at.is_(None),
+            FuelStation.is_active.is_(True),
+            geo_func.ST_DWithin(FuelStation.location, route, buffer_km * 1000),
+        )
+        .order_by(distance_col.asc())
+        .limit(limit)
+    )
+    rows = db.execute(query).all()
+    return [(row[0], row[1]) for row in rows]

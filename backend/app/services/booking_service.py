@@ -91,6 +91,20 @@ def create_booking(
     )
 
 
+def build_provider_report(db: Session, provider_id: int) -> dict:
+    by_status = booking_repository.count_by_status_for_provider(db, provider_id)
+    total = sum(by_status.values())
+    cancelled = by_status.get(BookingStatus.CANCELLED, 0)
+    return {
+        "total_bookings": total,
+        "by_status": by_status,
+        "cancelled_count": cancelled,
+        "rejected_count": by_status.get(BookingStatus.REJECTED, 0),
+        "completed_count": by_status.get(BookingStatus.COMPLETED, 0),
+        "cancellation_rate": round(cancelled / total, 4) if total else 0.0,
+    }
+
+
 def transition(db: Session, booking: Booking, new_status: str, actor: str, reason: str | None = None) -> Booking:
     if not can_transition(booking.status, new_status, actor):
         raise ConflictError(f"Cannot move a {booking.status} booking to {new_status}.")

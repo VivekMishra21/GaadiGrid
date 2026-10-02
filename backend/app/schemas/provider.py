@@ -41,6 +41,7 @@ class ProviderSummaryOut(BaseModel):
     longitude: float | None
     verification_status: str
     is_active: bool
+    is_sponsored: bool = False
     average_rating: float | None = None
     review_count: int = 0
 

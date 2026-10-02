@@ -57,6 +57,36 @@ services:
     volumes:
       - ./backend:/app
 
+  # Independent MongoDB used only by website/ (the marketing site's own Next.js + Prisma
+  # backend). Deliberately not shared with the PostgreSQL data above. Prisma's MongoDB
+  # connector requires a replica set (even single-node) for transactions, hence mongo-init.
+  mongo:
+    image: mongo:7
+    container_name: gaadigrid-customer-mongo
+    restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "${MONGO_PORT:-27018}:27017"
+    volumes:
+      - gaadigrid_customer_mongo_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo-init:
+    image: mongo:7
+    container_name: gaadigrid-customer-mongo-init
+    restart: "no"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    entrypoint: >
+      mongosh --host mongo:27017 --eval
+      "try { rs.status() } catch (e) { rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'mongo:27017'}]}) }"
+
 volumes:
   gaadigrid_customer_postgres_data:
   gaadigrid_customer_redis_data:
+  gaadigrid_customer_mongo_data:

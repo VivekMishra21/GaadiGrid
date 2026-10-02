@@ -4,7 +4,7 @@ import { colors } from '../theme/colors';
 
 export function ChipGroup({ label, options, value, onChange, error, testID }) {
   return (
-    <View style={styles.container} testID={testID}>
+    <View style={styles.container} testID={testID} accessibilityRole="radiogroup" accessibilityLabel={label}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={styles.row}>
         {options.map((option) => {
@@ -14,15 +14,20 @@ export function ChipGroup({ label, options, value, onChange, error, testID }) {
               key={option.value}
               onPress={() => onChange(option.value)}
               style={[styles.chip, selected && styles.chipSelected]}
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
+              accessibilityRole="radio"
+              accessibilityLabel={option.label}
+              accessibilityState={{ selected, checked: selected }}
             >
               <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{option.label}</Text>
             </TouchableOpacity>
           );
         })}
       </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text style={styles.error} accessibilityLiveRegion="polite">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

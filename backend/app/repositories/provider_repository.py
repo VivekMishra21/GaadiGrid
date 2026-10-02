@@ -102,10 +102,37 @@ def search(
 
     total = db.scalar(apply_filters(select(func.count(Provider.id)).where(base_filter)))
 
-    query = apply_filters(select(Provider).where(base_filter)).order_by(Provider.business_name.asc()).offset(offset).limit(limit)
+    # Sponsored providers are ordered first among otherwise-matching results — never
+    # injected into a search they don't actually match — then alphabetical within each
+    # group. See Provider.is_sponsored and ProviderSummaryOut.is_sponsored (the
+    # customer-facing "Sponsored" badge).
+    query = (
+        apply_filters(select(Provider).where(base_filter))
+        .order_by(Provider.is_sponsored.desc(), Provider.business_name.asc())
+        .offset(offset)
+        .limit(limit)
+    )
     items = db.scalars(query).all()
 
     return list(items), int(total or 0)
+
+
+def list_active_with_location(db: Session) -> list[Provider]:
+    """Active, located providers — the candidate set for Smart Pit Stop's in-Python
+    distance-to-route filtering (see services/pit_stop_service.py). Providers have no
+    PostGIS geography column like FuelStation does, so this stays a plain lat/lng
+    query; fine at current provider counts, and this is explicitly a post-MVP
+    foundation, not a performance-critical path."""
+    return list(
+        db.scalars(
+            select(Provider).where(
+                Provider.deleted_at.is_(None),
+                Provider.is_active.is_(True),
+                Provider.latitude.is_not(None),
+                Provider.longitude.is_not(None),
+            )
+        ).all()
+    )
 
 
 def list_all_for_admin(

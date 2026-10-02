@@ -114,3 +114,28 @@ jobs:
         run: npm run build
       - name: Docker build
         run: docker build -t gaadigrid-provider-web-ci --build-arg VITE_API_BASE_URL=https://api.example.com ./provider-web
+
+  website:
+    runs-on: ubuntu-latest
+    env:
+      # Route Handlers are server-rendered on demand (not prerendered), so `next build`
+      # never opens this connection — it only needs to be a syntactically valid URL for
+      # `prisma generate`'s schema validation.
+      DATABASE_URL: mongodb://localhost:27017/gaadigrid_website_ci?directConnection=true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+      - name: Lint
+        working-directory: website
+        run: npm run lint
+      - name: Type check
+        working-directory: website
+        run: npx tsc --noEmit
+      - name: Build
+        working-directory: website
+        run: npm run build

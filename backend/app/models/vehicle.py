@@ -46,3 +46,8 @@ class Vehicle(Base, TimestampMixin, SoftDeleteMixin):
     insurance_expiry: Mapped[date | None] = mapped_column(Date, nullable=True)
     puc_expiry: Mapped[date | None] = mapped_column(Date, nullable=True)
     service_due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+
+    # Fleet Pro foundation (see models/fleet_account.py) — null for every ordinary
+    # personal vehicle. A vehicle keeps using the exact same booking/expense/reminder
+    # code either way; this column only changes which fleet account it's grouped under.
+    fleet_account_id: Mapped[int | None] = mapped_column(ForeignKey("fleet_accounts.id"), nullable=True, index=True)

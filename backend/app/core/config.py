@@ -1,10 +1,19 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Resolved relative to this file (app/core/config.py -> backend/.env), not the process's
+# current working directory. `env_file=".env"` silently found nothing and fell back to
+# every class default whenever this app was launched with a cwd other than backend/
+# (e.g. `uvicorn app.main:app --app-dir backend` run from the repo root) — the app still
+# "worked" since most defaults happen to match the checked-in .env, which is exactly
+# what made this easy to miss.
+_ENV_FILE = Path(__file__).resolve().parent.parent.parent / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_ENV_FILE, env_file_encoding="utf-8", extra="ignore")
 
     environment: str = "development"
 
@@ -54,7 +63,7 @@ class Settings(BaseSettings):
     fcm_server_key: str = ""
     expo_access_token: str = ""
 
-    cors_allowed_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:8081"
+    cors_allowed_origins: str = "http://localhost:5173,http://localhost:5174,http://localhost:8081,http://localhost:3000"
 
     # Queue reporting (Phase 2)
     queue_report_expire_minutes: int = 45
@@ -64,6 +73,12 @@ class Settings(BaseSettings):
     queue_report_flag_threshold: int = 2
     default_station_search_radius_km: float = 10.0
     max_station_search_radius_km: float = 50.0
+
+    # Feature flags — off by default until the corresponding product/billing work is
+    # actually ready, per docs/RISKS_AND_PENDING_INTEGRATIONS.md. Flip via env var, no
+    # code change needed.
+    fleet_pro_enabled: bool = False
+    smart_pit_stop_enabled: bool = True
 
     @property
     def cors_origins_list(self) -> list[str]:

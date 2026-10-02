@@ -13,6 +13,7 @@ export const updatePackage = (providerId, packageId, payload) =>
   api.put(`/api/v1/providers/${providerId}/packages/${packageId}`, payload);
 
 export const listMyBookings = (page = 1) => api.get(`/api/v1/bookings/provider/mine?page=${page}&page_size=20`);
+export const getBookingReport = () => api.get('/api/v1/bookings/provider/mine/report');
 export const confirmBooking = (id) => api.post(`/api/v1/bookings/${id}/confirm`);
 export const rejectBooking = (id, reason) => api.post(`/api/v1/bookings/${id}/reject`, { reason });
 export const startBooking = (id) => api.post(`/api/v1/bookings/${id}/start`);

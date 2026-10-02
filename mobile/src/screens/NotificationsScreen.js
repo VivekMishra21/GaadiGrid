@@ -12,10 +12,18 @@ function formatDateTime(iso) {
 
 function NotificationRow({ notification, onPress }) {
   const unread = notification.read_at === null;
+  const label = `${unread ? 'Unread. ' : ''}${notification.title}. ${notification.body}. ${formatDateTime(notification.created_at)}`;
   return (
-    <TouchableOpacity style={styles.row} onPress={() => onPress(notification)} disabled={!unread}>
+    <TouchableOpacity
+      style={styles.row}
+      onPress={() => onPress(notification)}
+      disabled={!unread}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: !unread }}
+    >
       {unread ? <View style={styles.unreadDot} /> : <View style={styles.unreadDotSpacer} />}
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }} importantForAccessibility="no-hide-descendants">
         <Text style={styles.title}>{notification.title}</Text>
         <Text style={styles.body}>{notification.body}</Text>
         <Text style={styles.time}>{formatDateTime(notification.created_at)}</Text>

@@ -1,8 +1,17 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
-import { getMyProvider, listMySettlements } from '../api/providerApi';
+import { getBookingReport, getMyProvider, listMySettlements } from '../api/providerApi';
 import styles from './EarningsPage.module.css';
+
+const STATUS_LABELS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
+  IN_PROGRESS: 'In progress',
+  COMPLETED: 'Completed',
+};
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
@@ -10,6 +19,7 @@ function formatDate(iso) {
 
 export function EarningsPage() {
   const [settlements, setSettlements] = useState(null);
+  const [report, setReport] = useState(null);
 
   useEffect(() => {
     getMyProvider().then((provider) => {
@@ -19,6 +29,7 @@ export function EarningsPage() {
       }
       listMySettlements(provider.id).then((res) => setSettlements(res.items));
     });
+    getBookingReport().then(setReport);
   }, []);
 
   const totalNet = (settlements || []).reduce((sum, s) => sum + s.net_payable_amount, 0);
@@ -47,6 +58,48 @@ export function EarningsPage() {
           <div className={styles.summaryValue}>₹{paidOutNet.toFixed(2)}</div>
         </div>
       </div>
+
+      {report ? (
+        <>
+          <h2 className={styles.title} style={{ fontSize: 15, marginTop: 8 }}>
+            Bookings
+          </h2>
+          <div className={styles.summaryRow}>
+            <div className={styles.summaryCard}>
+              <div className={styles.summaryLabel}>Total bookings</div>
+              <div className={styles.summaryValue}>{report.total_bookings}</div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={styles.summaryLabel}>Completed</div>
+              <div className={styles.summaryValue}>{report.completed_count}</div>
+            </div>
+            <div className={styles.summaryCard}>
+              <div className={styles.summaryLabel}>Cancellation rate</div>
+              <div className={styles.summaryValue}>{(report.cancellation_rate * 100).toFixed(1)}%</div>
+            </div>
+          </div>
+          {Object.keys(report.by_status).length > 0 ? (
+            <div className={styles.tableWrap} style={{ marginBottom: 24 }}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(report.by_status).map(([status, count]) => (
+                    <tr key={status}>
+                      <td>{STATUS_LABELS[status] || status}</td>
+                      <td className={styles.muted}>{count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </>
+      ) : null}
 
       {settlements === null ? <p className={styles.empty}>Loading…</p> : null}
       {settlements && settlements.length === 0 ? (

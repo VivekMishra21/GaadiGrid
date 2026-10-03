@@ -88,6 +88,7 @@ class VehicleUpdateIn(BaseModel):
 class VehicleOut(VehicleBase):
     id: int
     owner_id: int
+    fleet_account_id: int | None = None
     created_at: datetime
     updated_at: datetime
 

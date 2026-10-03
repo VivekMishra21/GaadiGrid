@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
-from app.core.constants import ConsentType, OtpPurpose
+from app.core.constants import ConsentType, OtpPurpose, TokenType
 from app.core.config import settings
-from app.core.security import DUMMY_PASSWORD_HASH, verify_password
+from app.core.security import DUMMY_PASSWORD_HASH, decode_token, verify_password
 from app.database.session import get_db
 from app.middleware.rate_limit import rate_limit
 from app.middleware.rbac import get_current_user
@@ -84,10 +84,13 @@ def verify_otp(payload: OtpVerifyIn, request: Request, response: Response, db: S
         if not set(ConsentType.ALL).issubset(consent_types_given):
             raise ValidationError("You must accept the Terms of Service and Privacy Policy to continue.")
 
+        if payload.email and user_repository.get_by_email(db, payload.email) is not None:
+            raise ValidationError("An account with this email already exists. Try logging in instead.")
+
     otp_service.verify_otp(db, payload.phone, OtpPurpose.LOGIN, payload.otp)
 
     if is_new_user:
-        user = user_repository.create_customer(db, payload.phone, payload.full_name.strip())
+        user = user_repository.create_customer(db, payload.phone, payload.full_name.strip(), payload.email)
 
         now = datetime.now(timezone.utc)
         for consent in payload.consents:
@@ -149,13 +152,28 @@ def logout(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
 ):
+    """Signing out only needs the refresh token (body for mobile, httpOnly cookie for the web
+    clients). It deliberately does not require a valid access token: those expire after 15
+    minutes, and a logout that failed with 401 would leave a 30-day refresh credential alive."""
     token = payload.refresh_token or request.cookies.get(REFRESH_COOKIE_NAME)
     _clear_refresh_cookie(response)
-    record_audit_event(db, action="auth.logout", actor_user_id=user.id, target_type="user", target_id=str(user.id))
-    if token:
-        token_service.revoke_refresh_token(db, token)
+    if not token:
+        return
+
+    claims = decode_token(token)
+    if claims is None or claims.get("type") != TokenType.REFRESH:
+        return
+
+    token_service.revoke_refresh_token(db, token)
+    record_audit_event(
+        db,
+        action="auth.logout",
+        actor_user_id=int(claims["sub"]),
+        target_type="user",
+        target_id=str(claims["sub"]),
+        ip_address=_client_ip(request),
+    )
 
 
 @router.post("/delete-account", status_code=204)

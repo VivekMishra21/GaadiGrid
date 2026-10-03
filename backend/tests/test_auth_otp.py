@@ -134,6 +134,22 @@ def test_logout_revokes_refresh_token(client):
     assert res.status_code == 401
 
 
+def test_logout_works_without_a_valid_access_token(client):
+    """Access tokens expire after 15 minutes; signing out must still revoke the refresh token."""
+    result = signup_customer(client, "+919000000036")
+    refresh = result["refresh_token"]
+
+    res = client.post("/api/v1/auth/logout", json={"refresh_token": refresh}, headers=auth_header("expired.or.garbage"))
+    assert res.status_code == 204
+
+    res = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh})
+    assert res.status_code == 401
+
+
+def test_logout_with_no_token_is_a_harmless_204(client):
+    assert client.post("/api/v1/auth/logout", json={}).status_code == 204
+
+
 def test_delete_account_request_sets_flag(client, db_session):
     result = signup_customer(client, "+919000000011")
     access = result["access_token"]
@@ -145,3 +161,45 @@ def test_delete_account_request_sets_flag(client, db_session):
 
     user = db_session.query(User).filter(User.id == result["user"]["id"]).first()
     assert user.delete_requested_at is not None
+
+
+CONSENTS = [{"consent_type": "terms_of_service"}, {"consent_type": "privacy_policy"}]
+
+
+def _signup_with_email(client, phone, email):
+    otp = request_otp(client, phone)
+    return client.post(
+        "/api/v1/auth/otp/verify",
+        json={"phone": phone, "otp": otp, "full_name": "Email User", "email": email, "consents": CONSENTS},
+    )
+
+
+def test_signup_saves_normalised_email(client):
+    res = _signup_with_email(client, "+919000000031", "  Riya.Sharma@Example.COM ")
+    assert res.status_code == 200
+    assert res.json()["user"]["email"] == "riya.sharma@example.com"
+
+
+def test_signup_rejects_duplicate_email_without_burning_the_otp(client):
+    assert _signup_with_email(client, "+919000000032", "dup@example.com").status_code == 200
+
+    phone = "+919000000033"
+    otp = request_otp(client, phone)
+    payload = {"phone": phone, "otp": otp, "full_name": "Other", "email": "dup@example.com", "consents": CONSENTS}
+    rejected = client.post("/api/v1/auth/otp/verify", json=payload)
+    assert rejected.status_code == 422
+    assert "email" in rejected.json()["error"]["message"].lower()
+
+    # same OTP still works once a different email is used
+    retried = client.post("/api/v1/auth/otp/verify", json={**payload, "email": "other@example.com"})
+    assert retried.status_code == 200
+
+
+def test_signup_rejects_malformed_email(client):
+    res = _signup_with_email(client, "+919000000034", "not-an-email")
+    assert res.status_code == 422
+
+
+def test_signup_without_email_still_works(client):
+    result = signup_customer(client, "+919000000035", "No Email")
+    assert result["user"]["email"] is None

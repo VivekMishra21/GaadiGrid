@@ -124,11 +124,12 @@ def create_booking(payload: BookingCreateIn, db: Session = Depends(get_db), user
 def list_my_bookings(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
+    vehicle_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     offset = (page - 1) * page_size
-    items, total = booking_repository.list_for_customer(db, user.id, offset, page_size)
+    items, total = booking_repository.list_for_customer(db, user.id, offset, page_size, vehicle_id)
     return paginate(_to_out_batch(db, items), total, page, page_size)
 
 

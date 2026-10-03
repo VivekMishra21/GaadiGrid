@@ -20,8 +20,8 @@ def get_by_email(db: Session, email: str) -> User | None:
     return db.scalars(select(User).where(User.email == email, User.deleted_at.is_(None))).first()
 
 
-def create_customer(db: Session, phone: str, full_name: str) -> User:
-    user = User(phone=phone, full_name=full_name, role=Role.CUSTOMER)
+def create_customer(db: Session, phone: str, full_name: str, email: str | None = None) -> User:
+    user = User(phone=phone, full_name=full_name, email=email, role=Role.CUSTOMER)
     db.add(user)
     db.commit()
     db.refresh(user)

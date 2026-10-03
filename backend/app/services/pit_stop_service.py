@@ -90,3 +90,53 @@ def find_stations_along_route(
     limit: int,
 ):
     return station_repository.search_along_route(db, origin_lat, origin_lng, dest_lat, dest_lng, buffer_km, limit)
+
+
+# What the user can say their vehicle needs, mapped to the service categories that
+# satisfy it. Matching is on real, active service packages - nothing is inferred about the
+# vehicle's condition.
+NEED_CATEGORIES = {
+    "CAR_WASH": ["CAR_WASH", "DETAILING"],
+    "GENERAL_SERVICE": ["GENERAL_SERVICE"],
+    "TYRE_SERVICE": ["TYRE_SERVICE"],
+    "BATTERY_SERVICE": ["BATTERY_SERVICE"],
+    "AC_SERVICE": ["AC_SERVICE"],
+    "DENTING_PAINTING": ["DENTING_PAINTING"],
+}
+
+
+@dataclass
+class ProviderForNeed:
+    provider: Provider
+    distance_km: float
+    packages: list
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    d_phi = phi2 - phi1
+    d_lambda = math.radians(lng2 - lng1)
+    a = math.sin(d_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(d_lambda / 2) ** 2
+    return 2 * _EARTH_RADIUS_KM * math.asin(math.sqrt(a))
+
+
+def find_providers_for_need(
+    db: Session, need: str, lat: float, lng: float, radius_km: float, limit: int
+) -> list[ProviderForNeed]:
+    """Active providers within `radius_km` of the point that currently sell a service
+    matching `need`, nearest first, each with their matching packages (cheapest first)."""
+    from app.repositories import service_package_repository
+
+    categories = NEED_CATEGORIES[need]
+    candidates = provider_repository.list_active_with_location(db)
+    near = [(p, round(_haversine_km(lat, lng, p.latitude, p.longitude), 2)) for p in candidates]
+    near = [(p, d) for p, d in near if d <= radius_km]
+    packages = service_package_repository.list_active_in_categories_for_providers(db, [p.id for p, _ in near], categories)
+
+    by_provider: dict[int, list] = {}
+    for package in packages:
+        by_provider.setdefault(package.provider_id, []).append(package)
+
+    results = [ProviderForNeed(provider=p, distance_km=d, packages=by_provider[p.id]) for p, d in near if p.id in by_provider]
+    results.sort(key=lambda r: r.distance_km)
+    return results[:limit]

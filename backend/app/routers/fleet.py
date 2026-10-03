@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -6,9 +8,23 @@ from app.database.session import get_db
 from app.middleware.rbac import get_current_user
 from app.models.fleet_account import FleetRole
 from app.models.user import User
-from app.repositories import fleet_repository, user_repository, vehicle_repository
-from app.schemas.fleet import FleetAccountCreateIn, FleetAccountOut, FleetMemberAddIn, FleetMemberOut
+from app.repositories import (
+    expense_repository,
+    fleet_repository,
+    service_record_repository,
+    user_repository,
+    vehicle_repository,
+)
+from app.schemas.fleet import (
+    FleetAccountCreateIn,
+    FleetAccountOut,
+    FleetMemberAddIn,
+    FleetMemberOut,
+    FleetOverviewOut,
+    FleetVehicleOverviewOut,
+)
 from app.schemas.vehicle import VehicleOut
+from app.services import reminder_service, vehicle_insight_service
 from app.services.audit_service import record_audit_event
 from app.services.exceptions import ConflictError, ForbiddenError, NotFoundError
 
@@ -106,3 +122,74 @@ def add_member(
         db, action="fleet.member.add", actor_user_id=user.id, target_type="fleet_account", target_id=str(fleet_account_id)
     )
     return FleetMemberOut(user_id=member_user.id, full_name=member_user.full_name, role=member.role, added_at=member.created_at)
+
+
+@router.get("/{fleet_account_id}/overview", response_model=FleetOverviewOut)
+def get_fleet_overview(
+    fleet_account_id: int,
+    months: int = Query(default=6, ge=1, le=24),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Operational view across the fleet's vehicles: what is due, and what they have cost.
+    Open to the owner and managers; drivers don't get fleet-wide cost visibility."""
+    _require_enabled()
+    account = fleet_repository.get_by_id(db, fleet_account_id)
+    if account is None:
+        raise NotFoundError("Fleet account not found.")
+    membership = fleet_repository.get_membership(db, fleet_account_id, user.id)
+    if membership is None or membership.role not in (FleetRole.OWNER, FleetRole.MANAGER):
+        raise ForbiddenError("Only the fleet owner or a manager can see the fleet overview.")
+
+    today = date.today()
+    vehicles = vehicle_repository.list_by_fleet_account(db, fleet_account_id)
+    spend = expense_repository.sum_by_vehicle(db, [v.id for v in vehicles], vehicle_insight_service.window_start(today, months))
+    rows = []
+    for v in vehicles:
+        odometer = service_record_repository.latest_odometer(db, v.id)
+        rows.append(
+            FleetVehicleOverviewOut(
+                vehicle=VehicleOut.model_validate(v),
+                reminders=reminder_service.compute_reminders([v], today),
+                spend_period=round(spend.get(v.id, 0.0), 2),
+                latest_odometer_km=odometer[0] if odometer else None,
+            )
+        )
+
+    all_reminders = reminder_service.compute_reminders(vehicles, today)
+    return FleetOverviewOut(
+        account=_to_out(db, account),
+        your_role=membership.role,
+        period_months=months,
+        total_spend_period=round(sum(spend.values()), 2),
+        vehicles=rows,
+        upcoming_reminders=[r for r in all_reminders if r["urgency"] != "OK"][:10],
+    )
+
+
+@router.delete("/{fleet_account_id}/vehicles/{vehicle_id}", status_code=204)
+def detach_vehicle(
+    fleet_account_id: int, vehicle_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    _require_enabled()
+    _require_owner(db, fleet_account_id, user)
+    vehicle = vehicle_repository.get_by_id(db, vehicle_id)
+    if vehicle is None or vehicle.fleet_account_id != fleet_account_id:
+        raise NotFoundError("That vehicle is not part of this fleet.")
+    vehicle_repository.update(db, vehicle, {"fleet_account_id": None})
+    record_audit_event(db, action="fleet.vehicle.detach", actor_user_id=user.id, target_type="vehicle", target_id=str(vehicle_id))
+
+
+@router.delete("/{fleet_account_id}/members/{member_user_id}", status_code=204)
+def remove_member(
+    fleet_account_id: int, member_user_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    _require_enabled()
+    _require_owner(db, fleet_account_id, user)
+    membership = fleet_repository.get_membership(db, fleet_account_id, member_user_id)
+    if membership is None:
+        raise NotFoundError("That person is not on this fleet account.")
+    if membership.role == FleetRole.OWNER:
+        raise ForbiddenError("The fleet owner cannot be removed.")
+    fleet_repository.remove_member(db, membership)
+    record_audit_event(db, action="fleet.member.remove", actor_user_id=user.id, target_type="fleet_account", target_id=str(fleet_account_id))

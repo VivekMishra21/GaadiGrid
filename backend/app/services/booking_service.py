@@ -10,7 +10,7 @@ from app.models.service_package import ServicePackage
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.repositories import booking_repository, payment_order_repository, provider_availability_repository
-from app.services import payment_service, settlement_service
+from app.services import payment_service, service_record_service, settlement_service
 from app.services.booking_state_machine import TIMESTAMP_FIELD_FOR_STATUS, BookingActor, can_transition
 from app.services.exceptions import ConflictError, NotFoundError, ValidationError
 from app.services.slot_service import compute_available_slots
@@ -131,5 +131,6 @@ def transition(db: Session, booking: Booking, new_status: str, actor: str, reaso
         payment_service.issue_refund(db, booking, initiated_by, reason or "Booking cancelled")
     elif new_status == BookingStatus.COMPLETED:
         settlement_service.create_settlement_for_booking(db, booking)
+        service_record_service.record_completed_booking(db, booking)
 
     return booking

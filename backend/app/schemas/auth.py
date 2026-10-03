@@ -48,12 +48,19 @@ class OtpVerifyIn(BaseModel):
     phone: str
     otp: str = Field(min_length=4, max_length=8)
     full_name: str | None = Field(default=None, max_length=255)
+    # Optional, only used when this verification creates a new account.
+    email: EmailStr | None = None
     consents: list[ConsentInput] = Field(default_factory=list)
 
     @field_validator("phone")
     @classmethod
     def check_phone(cls, v: str) -> str:
         return validate_phone(v)
+
+    @field_validator("email")
+    @classmethod
+    def normalise_email(cls, v: str | None) -> str | None:
+        return v.strip().lower() if v else None
 
 
 class StaffLoginIn(BaseModel):

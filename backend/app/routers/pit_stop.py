@@ -3,8 +3,16 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.database.session import get_db
-from app.repositories import fuel_price_repository
-from app.schemas.pit_stop import PitStopFuelPriceOut, PitStopProviderOut, PitStopStationOut, PitStopSuggestionsOut
+from app.repositories import fuel_price_repository, review_repository
+from app.schemas.pit_stop import (
+    PitStopFuelPriceOut,
+    PitStopNeedOut,
+    PitStopNeedPackageOut,
+    PitStopNeedProviderOut,
+    PitStopProviderOut,
+    PitStopStationOut,
+    PitStopSuggestionsOut,
+)
 from app.services import pit_stop_service
 
 router = APIRouter(prefix="/api/v1/pit-stop", tags=["pit-stop"])
@@ -65,3 +73,55 @@ def get_pit_stop_suggestions(
     ]
 
     return PitStopSuggestionsOut(stations=stations, providers=providers)
+
+
+@router.get("/needs", response_model=PitStopNeedOut)
+def get_pit_stop_for_need(
+    need: str = Query(description="One of: " + ", ".join(pit_stop_service.NEED_CATEGORIES)),
+    lat: float = Query(ge=-90, le=90),
+    lng: float = Query(ge=-180, le=180),
+    radius_km: float = Query(default=10.0, gt=0, le=50),
+    limit: int = Query(default=15, ge=1, le=30),
+    db: Session = Depends(get_db),
+):
+    """Nearby partners that actually sell what the vehicle needs right now (a car wash, a
+    tyre job, a battery...), nearest first, with the matching packages and prices."""
+    if not settings.smart_pit_stop_enabled:
+        raise HTTPException(status_code=404, detail="Smart Pit Stop is not available yet.")
+    if need not in pit_stop_service.NEED_CATEGORIES:
+        raise HTTPException(status_code=422, detail=f"need must be one of {sorted(pit_stop_service.NEED_CATEGORIES)}")
+
+    rows = pit_stop_service.find_providers_for_need(db, need, lat, lng, radius_km, limit)
+    ratings = review_repository.get_ratings_for_providers(db, [r.provider.id for r in rows])
+    providers = []
+    for row in rows:
+        p = row.provider
+        average_rating, review_count = ratings.get(p.id, (None, 0))
+        providers.append(
+            PitStopNeedProviderOut(
+                id=p.id,
+                business_name=p.business_name,
+                address=p.address,
+                city=p.city,
+                locality=p.locality,
+                latitude=p.latitude,
+                longitude=p.longitude,
+                distance_km=row.distance_km,
+                is_sponsored=p.is_sponsored,
+                verification_status=p.verification_status,
+                average_rating=average_rating,
+                review_count=review_count,
+                packages=[
+                    PitStopNeedPackageOut(
+                        id=pkg.id,
+                        category=pkg.category,
+                        name=pkg.name,
+                        price=pkg.price,
+                        duration_minutes=pkg.duration_minutes,
+                        is_doorstep=pkg.is_doorstep,
+                    )
+                    for pkg in row.packages
+                ],
+            )
+        )
+    return PitStopNeedOut(need=need, radius_km=radius_km, providers=providers)

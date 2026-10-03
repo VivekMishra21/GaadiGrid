@@ -45,3 +45,8 @@ def add_member(db: Session, fleet_account_id: int, user_id: int, role: str) -> F
     db.commit()
     db.refresh(member)
     return member
+
+
+def remove_member(db: Session, member: FleetMember) -> None:
+    db.delete(member)
+    db.commit()

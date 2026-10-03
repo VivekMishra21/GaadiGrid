@@ -28,6 +28,7 @@ from app.routers.settlements import router as settlements_router
 from app.routers.stations import fuel_types_router
 from app.routers.stations import router as stations_router
 from app.routers.users import router as users_router
+from app.routers.service_records import router as service_records_router
 from app.routers.vehicles import router as vehicles_router
 from app.services.exceptions import ServiceError
 
@@ -108,6 +109,7 @@ app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(vehicles_router)
+app.include_router(service_records_router)
 app.include_router(addresses_router)
 app.include_router(admin_router)
 app.include_router(stations_router)

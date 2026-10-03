@@ -55,3 +55,19 @@ def update(db: Session, package: ServicePackage, data: dict) -> ServicePackage:
     db.commit()
     db.refresh(package)
     return package
+
+
+def list_active_in_categories_for_providers(db: Session, provider_ids: list[int], categories: list[str]) -> list[ServicePackage]:
+    if not provider_ids or not categories:
+        return []
+    return list(
+        db.scalars(
+            select(ServicePackage)
+            .where(
+                ServicePackage.provider_id.in_(provider_ids),
+                ServicePackage.category.in_(categories),
+                ServicePackage.is_active.is_(True),
+            )
+            .order_by(ServicePackage.price.asc())
+        ).all()
+    )

@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.models.fleet_account import FleetRole
+from app.schemas.reminder import ReminderOut
 from app.schemas.vehicle import VehicleOut
 
 
@@ -38,3 +39,19 @@ class FleetMemberAddIn(BaseModel):
         if v not in FleetRole.ALL:
             raise ValueError(f"role must be one of {FleetRole.ALL}")
         return v
+
+
+class FleetVehicleOverviewOut(BaseModel):
+    vehicle: VehicleOut
+    reminders: list[ReminderOut]
+    spend_period: float
+    latest_odometer_km: int | None
+
+
+class FleetOverviewOut(BaseModel):
+    account: FleetAccountOut
+    your_role: str
+    period_months: int
+    total_spend_period: float
+    vehicles: list[FleetVehicleOverviewOut]
+    upcoming_reminders: list[ReminderOut]

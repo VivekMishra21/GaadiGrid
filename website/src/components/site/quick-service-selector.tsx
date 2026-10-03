@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { Fuel, Sparkles, Wrench } from "lucide-react";
 
-import { Reveal } from "@/components/site/reveal";
+import { Reveal, RevealGroup } from "@/components/site/reveal";
 
 const SERVICES = [
   {
@@ -34,19 +33,17 @@ export function QuickServiceSelector() {
         <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">What do you need today?</h2>
       </Reveal>
 
-      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <RevealGroup className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
         {SERVICES.map(({ href, icon: Icon, title, description }) => (
-          <motion.div key={href} whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}>
-            <Link href={href} className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6">
-              <span className="flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green transition-colors group-hover:bg-brand-green group-hover:text-primary-foreground">
+          <Link key={href} href={href} className="lift-card group flex h-full flex-col rounded-2xl border border-border bg-card p-6">
+              <span className="lift-icon flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green group-hover:bg-brand-green group-hover:text-primary-foreground">
                 <Icon className="size-5" />
               </span>
               <h3 className="mt-5 text-base font-semibold text-foreground">{title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
-            </Link>
-          </motion.div>
+          </Link>
         ))}
-      </div>
+      </RevealGroup>
     </section>
   );
 }

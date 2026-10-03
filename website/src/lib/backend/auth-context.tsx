@@ -26,7 +26,7 @@ interface AuthContextValue {
   verifyOtp: (
     phone: string,
     otp: string,
-    signup?: { fullName: string }
+    signup?: { fullName: string; email?: string }
   ) => Promise<User>;
   logout: () => void;
 }
@@ -65,10 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return api.post<OtpRequestResult>("/api/v1/auth/otp/request", { phone });
   }
 
-  async function verifyOtp(phone: string, otp: string, signup?: { fullName: string }) {
+  async function verifyOtp(phone: string, otp: string, signup?: { fullName: string; email?: string }) {
     const payload: Record<string, unknown> = { phone, otp };
     if (signup) {
       payload.full_name = signup.fullName;
+      if (signup.email) payload.email = signup.email;
       payload.consents = [
         { consent_type: "terms_of_service", version: "1.0" },
         { consent_type: "privacy_policy", version: "1.0" },

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import { Reveal, RevealGroup } from "@/components/site/reveal";
 import { LocationPicker, type PickedLocation } from "@/components/site/location-picker";
@@ -9,8 +8,7 @@ import { StationCard, StationCardSkeleton } from "@/components/site/station-card
 import { api } from "@/lib/backend/client";
 import type { Paginated, StationSummary } from "@/lib/backend/types";
 import { DEFAULT_NOIDA_CENTER } from "@/lib/noida-localities";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button";
 
 export function NearbyPreview() {
   const [location, setLocation] = useState<PickedLocation>({
@@ -71,9 +69,9 @@ export function NearbyPreview() {
       ) : null}
 
       <div className="mt-8 text-center">
-        <Link href="/find-fuel" className={cn(buttonVariants({ variant: "outline", size: "default" }), "rounded-full")}>
+        <ButtonLink href="/find-fuel" variant="secondary" className="rounded-full">
           See all nearby stations
-        </Link>
+        </ButtonLink>
       </div>
     </section>
   );

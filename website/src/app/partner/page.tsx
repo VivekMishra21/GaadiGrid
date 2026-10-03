@@ -1,15 +1,14 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const BUSINESS_TYPES = ["Fuel / CNG Station", "Car Wash", "Detailing", "Vehicle Care / Service Center", "Other"];
 
@@ -123,20 +122,9 @@ export default function PartnerPage() {
 
             {error ? <p className="sm:col-span-2 text-sm text-destructive">{error}</p> : null}
 
-            <button
-              type="submit"
-              disabled={status === "submitting"}
-              className={cn(buttonVariants({ size: "lg" }), "mt-1 rounded-full sm:col-span-2")}
-            >
-              {status === "submitting" ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                "Become a Partner"
-              )}
-            </button>
+            <Button type="submit" size="lg" loading={status === "submitting"} className="mt-1 rounded-full sm:col-span-2">
+              Become a Partner
+            </Button>
           </form>
         )}
       </main>

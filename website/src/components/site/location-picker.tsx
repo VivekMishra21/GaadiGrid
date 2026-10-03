@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, LocateFixed, MapPin } from "lucide-react";
+import { LocateFixed, MapPin } from "lucide-react";
 
 import { NOIDA_LOCALITIES } from "@/lib/noida-localities";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 
 export interface PickedLocation {
   label: string;
@@ -71,15 +70,17 @@ export function LocationPicker({
           </select>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="md"
           onClick={useMyLocation}
-          disabled={locating}
-          className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-12 shrink-0 rounded-xl")}
+          loading={locating}
+          leftIcon={<LocateFixed className="size-4" />}
+          className="shrink-0"
         >
-          {locating ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4" />}
           Use my location
-        </button>
+        </Button>
       </div>
 
       {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}

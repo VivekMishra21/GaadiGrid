@@ -27,7 +27,7 @@ export function VehicleCareInspection() {
             <div
               aria-hidden
               className="absolute inset-0 rounded-2xl"
-              style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+              style={{ boxShadow: "inset 0 0 0 1px rgba(17,24,26,0.06)" }}
             />
           </div>
         </Reveal>

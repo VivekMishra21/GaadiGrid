@@ -1,57 +1,147 @@
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import * as React from "react";
+import Link from "next/link";
+import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
+/**
+ * GaadiGrid's one button.
+ *
+ * Variants: primary (emerald, default CTA) · secondary · accent (orange, use sparingly) · dark ·
+ * ghost · danger (destructive actions only) · link.
+ * Sizes: sm 40px · md 48px · lg 52px · icon 48px square. Width is chosen per screen with
+ * `fullWidth`; nothing screen-specific lives here.
+ *
+ * `buttonVariants` is exported so a link or custom element can wear the same styles, but
+ * prefer <Button> / <ButtonLink> — they add loading, icons and the right semantics.
+ * Colours come from the theme tokens in globals.css (--brand-green, --brand-orange,
+ * --foreground, --destructive), never literal hex values.
+ */
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  [
+    "relative inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap select-none",
+    "rounded-xl border border-transparent font-sans leading-none",
+    "transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-[var(--ease-premium)]",
+    "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    // press: a slight scale-down. Hover lift is added per solid variant below. No movement for reduced-motion users.
+    "active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100",
+    "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
+    "[&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  ],
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
-        outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        primary:
+          "bg-brand-green text-white shadow-sm hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--brand-green),black_7%)] hover:shadow-md hover:shadow-brand-green/20 active:translate-y-0 active:bg-[color-mix(in_oklch,var(--brand-green),black_14%)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
-        destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-brand-green/60 bg-card text-brand-green hover:bg-brand-green/10 active:bg-brand-green/15",
+        accent:
+          "bg-brand-orange text-white shadow-sm hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--brand-orange),black_7%)] hover:shadow-md hover:shadow-brand-orange/20 active:translate-y-0 active:bg-[color-mix(in_oklch,var(--brand-orange),black_14%)]",
+        dark: "bg-foreground text-white shadow-sm hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--foreground),white_14%)] hover:shadow-md active:translate-y-0 active:bg-[color-mix(in_oklch,var(--foreground),white_22%)]",
+        ghost: "bg-transparent text-foreground hover:bg-muted active:bg-[color-mix(in_oklch,var(--muted),black_5%)]",
+        danger:
+          "bg-destructive text-white shadow-sm hover:-translate-y-px hover:bg-[color-mix(in_oklch,var(--destructive),black_8%)] hover:shadow-md active:translate-y-0 active:bg-[color-mix(in_oklch,var(--destructive),black_16%)]",
+        link: "h-auto rounded-sm bg-transparent p-0 text-brand-green underline-offset-4 hover:underline active:opacity-80",
       },
       size: {
-        default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-8",
-        "icon-xs":
-          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
+        sm: "h-10 px-4 text-sm font-semibold",
+        md: "h-12 px-5 text-sm font-semibold",
+        lg: "h-[52px] px-6 text-base font-bold",
+        icon: "size-12 p-0 text-sm font-semibold",
+      },
+      fullWidth: {
+        true: "w-full",
+        false: "",
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: "primary",
+      size: "md",
+      fullWidth: false,
     },
   }
-)
+);
 
-function Button({
-  className,
-  variant = "default",
-  size = "default",
-  ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+type ButtonStyleProps = VariantProps<typeof buttonVariants>;
+
+type ButtonOwnProps = ButtonStyleProps & {
+  /** Shows a spinner and blocks interaction without changing the button's size. */
+  loading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+};
+
+type ButtonProps = ButtonOwnProps & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonOwnProps>;
+
+function ButtonContent({
+  loading,
+  leftIcon,
+  rightIcon,
+  children,
+}: Pick<ButtonOwnProps, "loading" | "leftIcon" | "rightIcon"> & { children?: React.ReactNode }) {
   return (
-    <ButtonPrimitive
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
+    <>
+      {/* The label stays in the layout (just hidden) while loading, so the button keeps its width. */}
+      <span className={cn("inline-flex items-center justify-center gap-2", loading && "invisible")}>
+        {leftIcon}
+        {children}
+        {rightIcon}
+      </span>
+      {loading ? (
+        <span className="absolute inset-0 flex items-center justify-center" aria-hidden>
+          <Loader2 className="size-4 animate-spin" />
+        </span>
+      ) : null}
+    </>
+  );
 }
 
-export { Button, buttonVariants }
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant, size, fullWidth, loading = false, leftIcon, rightIcon, disabled, className, children, type = "button", ...props },
+  ref
+) {
+  if (process.env.NODE_ENV !== "production" && size === "icon" && !props["aria-label"] && !props["aria-labelledby"]) {
+    console.warn("<Button size=\"icon\"> needs an aria-label so screen readers can name it.");
+  }
+  const blocked = disabled || loading;
+  return (
+    <button
+      ref={ref}
+      type={type}
+      data-slot="button"
+      disabled={blocked}
+      aria-busy={loading || undefined}
+      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+      {...props}
+    >
+      <ButtonContent loading={loading} leftIcon={leftIcon} rightIcon={rightIcon}>
+        {children}
+      </ButtonContent>
+    </button>
+  );
+});
+
+type ButtonLinkProps = ButtonStyleProps &
+  Pick<ButtonOwnProps, "leftIcon" | "rightIcon"> &
+  Omit<React.ComponentProps<typeof Link>, "className"> & { className?: string; disabled?: boolean };
+
+/** Same look as <Button>, but a real link (navigation) — keeps correct link semantics. */
+function ButtonLink({ variant, size, fullWidth, leftIcon, rightIcon, disabled, className, children, ...props }: ButtonLinkProps) {
+  return (
+    <Link
+      data-slot="button"
+      aria-disabled={disabled || undefined}
+      tabIndex={disabled ? -1 : undefined}
+      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+      {...props}
+    >
+      <ButtonContent leftIcon={leftIcon} rightIcon={rightIcon}>
+        {children}
+      </ButtonContent>
+    </Link>
+  );
+}
+
+export { Button, ButtonLink, buttonVariants };
+export type { ButtonProps };

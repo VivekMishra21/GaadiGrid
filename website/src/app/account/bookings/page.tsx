@@ -5,8 +5,9 @@ import { CalendarClock, PackageOpen } from "lucide-react";
 
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
+import { GaadiGridLoader } from "@/components/site/loader";
 import { RequireAuth } from "@/components/site/require-auth";
-import { buttonVariants } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { api, ApiError } from "@/lib/backend/client";
 import type { Booking, Paginated } from "@/lib/backend/types";
@@ -57,17 +58,17 @@ function BookingsList() {
       {error ? <p className="mt-6 text-sm text-destructive">{error}</p> : null}
 
       {bookings === null ? (
-        <p className="mt-8 text-sm text-muted-foreground">Loading your bookings…</p>
+        <GaadiGridLoader label="Loading your bookings" />
       ) : bookings.length === 0 ? (
         <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
           <PackageOpen className="size-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No bookings yet.</p>
-          <a href="/car-wash" className={cn(buttonVariants({ size: "default" }), "mt-2 rounded-full")}>
+          <ButtonLink href="/car-wash" className="mt-2 rounded-full">
             Book a service
-          </a>
+          </ButtonLink>
         </div>
       ) : (
-        <div className="mt-8 flex flex-col gap-4">
+        <div className="stagger-in mt-8 flex flex-col gap-4">
           {bookings.map((b) => {
             const canCancel = !["COMPLETED", "REJECTED", "CANCELLED"].includes(b.status);
             return (

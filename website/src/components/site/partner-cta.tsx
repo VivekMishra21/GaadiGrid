@@ -1,8 +1,6 @@
-import Link from "next/link";
 
 import { Reveal } from "@/components/site/reveal";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button";
 
 export function PartnerCta() {
   return (
@@ -21,9 +19,9 @@ export function PartnerCta() {
           Run a fuel station, car wash, or vehicle care business? Help more local drivers
           discover your services.
         </p>
-        <Link href="/partner" className={cn(buttonVariants({ size: "lg" }), "mt-8 rounded-full px-7")}>
+        <ButtonLink href="/partner" size="lg" className="mt-8 rounded-full px-7">
           Become a Partner
-        </Link>
+        </ButtonLink>
       </Reveal>
     </section>
   );

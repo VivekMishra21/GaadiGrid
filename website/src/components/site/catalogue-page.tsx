@@ -105,7 +105,7 @@ export function CataloguePage({
                   whileTap={{ scale: 0.98 }}
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "group w-full rounded-full px-7 text-base sm:w-fit"
+                    "group w-full rounded-full px-7 sm:w-fit"
                   )}
                 >
                   {hero.buttonLabel}
@@ -137,7 +137,7 @@ export function CataloguePage({
                 <div
                   aria-hidden
                   className="absolute inset-0 rounded-2xl"
-                  style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
+                  style={{ boxShadow: "inset 0 0 0 1px rgba(17,24,26,0.06)" }}
                 />
               </div>
             </motion.div>

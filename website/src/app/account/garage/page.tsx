@@ -5,6 +5,7 @@ import { Car, Trash2 } from "lucide-react";
 
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
+import { GaadiGridLoader } from "@/components/site/loader";
 import { RequireAuth } from "@/components/site/require-auth";
 import { VehicleForm } from "@/components/site/vehicle-form";
 import { api, ApiError } from "@/lib/backend/client";
@@ -45,9 +46,9 @@ function GarageList() {
       {error ? <p className="mt-6 text-sm text-destructive">{error}</p> : null}
 
       {vehicles === null ? (
-        <p className="mt-8 text-sm text-muted-foreground">Loading your garage…</p>
+        <GaadiGridLoader label="Loading your garage" />
       ) : (
-        <div className="mt-8 flex flex-col gap-4">
+        <div className="stagger-in mt-8 flex flex-col gap-4">
           {vehicles.map((v) => (
             <div key={v.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-5">
               <div className="flex items-center gap-4">

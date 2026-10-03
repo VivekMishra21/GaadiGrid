@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Loader2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/backend/client";
 import { FUEL_TYPE_LABELS, FUEL_TYPES, VEHICLE_TYPE_LABELS, VEHICLE_TYPES, type Vehicle } from "@/lib/backend/types";
 
@@ -100,14 +98,13 @@ export function VehicleForm({ onCreated, onCancel }: { onCreated: (vehicle: Vehi
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <div className="flex gap-3">
-        <button type="submit" disabled={submitting} className={cn(buttonVariants({ size: "default" }), "rounded-full")}>
-          {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
+        <Button type="submit" loading={submitting} className="rounded-full">
           Save vehicle
-        </button>
+        </Button>
         {onCancel ? (
-          <button type="button" onClick={onCancel} className={cn(buttonVariants({ variant: "ghost", size: "default" }), "rounded-full")}>
+          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-full">
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>

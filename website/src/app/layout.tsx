@@ -1,27 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { AuthProvider } from "@/lib/backend/auth-context";
+import { MotionProvider } from "@/components/site/motion-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-// A distinct display serif for headlines only (body copy and UI stay on Geist Sans for
-// legibility) — gives the site an editorial, considered feel instead of looking like an
-// unstyled default.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
+// Manrope is GaadiGrid's single typeface. One self-hosted variable file covers every weight
+// (400 body, 600 labels/buttons, 700 headings, 800 wordmark) — no external font request.
+const manrope = localFont({
+  src: "../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2",
+  variable: "--font-manrope",
+  weight: "200 800",
+  display: "swap",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gaadigrid.com";
@@ -58,18 +48,20 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#102a43",
-  colorScheme: "dark",
+  themeColor: "#f8faf9",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <MotionProvider>{children}</MotionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -2,12 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "motion/react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -104,20 +103,9 @@ export function WaitlistForm() {
 
       {error ? <p className="sm:col-span-2 text-sm text-destructive">{error}</p> : null}
 
-      <button
-        type="submit"
-        disabled={status === "submitting"}
-        className={cn(buttonVariants({ size: "lg" }), "mt-1 rounded-full sm:col-span-2")}
-      >
-        {status === "submitting" ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Joining...
-          </>
-        ) : (
-          "Join the waitlist"
-        )}
-      </button>
+      <Button type="submit" size="lg" loading={status === "submitting"} className="mt-1 rounded-full sm:col-span-2">
+        Join the waitlist
+      </Button>
     </form>
   );
 }

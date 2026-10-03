@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Send } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -89,23 +88,15 @@ export function ContactForm() {
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <button
+      <Button
         type="submit"
-        disabled={status === "submitting"}
-        className={cn(buttonVariants({ variant: "secondary", size: "default" }), "self-start rounded-full")}
+        variant="secondary"
+        loading={status === "submitting"}
+        leftIcon={<Send className="size-4" />}
+        className="self-start rounded-full"
       >
-        {status === "submitting" ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          <>
-            <Send className="size-4" />
-            Send message
-          </>
-        )}
-      </button>
+        Send message
+      </Button>
     </form>
   );
 }

@@ -1,15 +1,14 @@
 "use client";
 
 import { use, useEffect, useState, type FormEvent } from "react";
-import Link from "next/link";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
 import { VehicleForm } from "@/components/site/vehicle-form";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/backend/auth-context";
 import { api, ApiError } from "@/lib/backend/client";
@@ -120,12 +119,9 @@ export default function BookServicePage(props: { params: Promise<{ providerId: s
         <main className="mx-auto flex min-h-[50vh] max-w-lg flex-col items-center justify-center px-5 text-center">
           <h1 className="text-2xl font-extrabold tracking-tight">Log in to book this service</h1>
           <p className="mt-2 text-muted-foreground">You&apos;ll need an account to reserve a slot and manage your booking.</p>
-          <Link
-            href={`/login?next=/book/${providerId}/${packageId}`}
-            className={cn(buttonVariants({ size: "lg" }), "mt-6 rounded-full")}
-          >
+          <ButtonLink href={`/login?next=/book/${providerId}/${packageId}`} size="lg" className="mt-6 rounded-full">
             Log in or sign up
-          </Link>
+          </ButtonLink>
         </main>
         <Footer />
       </>
@@ -143,9 +139,9 @@ export default function BookServicePage(props: { params: Promise<{ providerId: s
             {provider?.business_name} will confirm your {confirmed.package_name} appointment shortly. You can track
             its status anytime in My Bookings.
           </p>
-          <Link href="/account/bookings" className={cn(buttonVariants({ size: "lg" }), "mt-6 rounded-full")}>
+          <ButtonLink href="/account/bookings" size="lg" className="mt-6 rounded-full">
             View My Bookings
-          </Link>
+          </ButtonLink>
         </main>
         <Footer />
       </>
@@ -276,14 +272,15 @@ export default function BookServicePage(props: { params: Promise<{ providerId: s
 
               {submitError ? <p className="text-sm text-destructive">{submitError}</p> : null}
 
-              <button
+              <Button
                 type="submit"
-                disabled={submitting || !effectiveSelectedSlot || !vehicleId}
-                className={cn(buttonVariants({ size: "lg" }), "rounded-full")}
+                size="lg"
+                loading={submitting}
+                disabled={!effectiveSelectedSlot || !vehicleId}
+                className="rounded-full"
               >
-                {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
                 Confirm booking
-              </button>
+              </Button>
             </form>
           </>
         )}

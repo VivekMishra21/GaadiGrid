@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { CalendarCheck, ListChecks, SearchCheck } from "lucide-react";
 
 import { Reveal, RevealGroup } from "@/components/site/reveal";
@@ -33,18 +32,13 @@ export function WhyGaadiGrid() {
 
       <RevealGroup className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
         {REASONS.map(({ icon: Icon, title, description }) => (
-          <motion.div
-            key={title}
-            whileHover={{ y: -6 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
-            className="rounded-2xl border border-border bg-card p-6"
-          >
-            <span className="flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green">
+          <div key={title} className="lift-card rounded-2xl border border-border bg-card p-6">
+            <span className="lift-icon flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green">
               <Icon className="size-5" />
             </span>
             <h3 className="mt-5 text-base font-semibold text-foreground">{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
-          </motion.div>
+          </div>
         ))}
       </RevealGroup>
     </section>

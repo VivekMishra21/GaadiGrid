@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 import { Reveal, RevealGroup } from "@/components/site/reveal";
 import { ServiceCard, ServiceCardSkeleton } from "@/components/site/service-card";
 import { loadCatalogue, type CatalogueEntry } from "@/lib/backend/catalogue";
 import { CAR_WASH_CATEGORIES } from "@/lib/backend/types";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button";
 
 export function CarWashPreview() {
   const [entries, setEntries] = useState<CatalogueEntry[] | null>(null);
@@ -46,9 +44,9 @@ export function CarWashPreview() {
       </RevealGroup>
 
       <div className="mt-8 text-center">
-        <Link href="/car-wash" className={cn(buttonVariants({ variant: "outline", size: "default" }), "rounded-full")}>
+        <ButtonLink href="/car-wash" variant="secondary" className="rounded-full">
           See all car wash services
-        </Link>
+        </ButtonLink>
       </div>
     </section>
   );

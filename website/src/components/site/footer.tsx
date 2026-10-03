@@ -14,7 +14,8 @@ const EXPLORE_LINKS = [
 const ACCOUNT_LINKS = [
   { href: "/account/bookings", label: "My Bookings" },
   { href: "/account/garage", label: "My Garage" },
-  { href: "/login", label: "Login / Sign up" },
+  { href: "/login", label: "Log in" },
+  { href: "/signup", label: "Sign up" },
 ];
 
 const COMPANY_LINKS = [

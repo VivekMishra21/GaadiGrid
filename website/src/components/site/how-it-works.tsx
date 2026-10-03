@@ -1,15 +1,9 @@
 "use client";
 
 import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 
 import { Reveal, RevealGroup } from "@/components/site/reveal";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const STEPS = [
   {
@@ -30,30 +24,12 @@ const STEPS = [
 ];
 
 export function HowItWorks() {
-  const lineRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
 
-  useGSAP(
-    () => {
-      if (!lineRef.current || !sectionRef.current) return;
-      gsap.fromTo(
-        lineRef.current,
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          ease: "none",
-          transformOrigin: "top center",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 70%",
-            end: "bottom 60%",
-            scrub: 0.6,
-          },
-        }
-      );
-    },
-    { scope: sectionRef }
-  );
+  // The emerald indicator fills as the steps scroll past: a quiet "progress along the route".
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start 70%", "end 60%"] });
+  const fill = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <section id="how-it-works" className="mx-auto max-w-5xl px-5 py-24 md:py-32">
@@ -72,9 +48,9 @@ export function HowItWorks() {
 
       <div ref={sectionRef} className="relative mt-8">
         <div className="absolute top-0 bottom-0 left-5 hidden w-px bg-border sm:block" aria-hidden />
-        <div
-          ref={lineRef}
-          className="absolute top-0 bottom-0 left-5 hidden w-px bg-brand-green sm:block"
+        <motion.div
+          className="absolute top-0 bottom-0 left-5 hidden w-px origin-top bg-brand-green sm:block"
+          style={{ scaleY: reduced ? 1 : fill }}
           aria-hidden
         />
 

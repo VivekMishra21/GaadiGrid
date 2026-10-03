@@ -12,7 +12,7 @@ export function StationCard({ station }: { station: StationSummary }) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}`;
 
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card p-5">
+    <div className="lift-card flex flex-col rounded-2xl border border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold text-foreground">{station.name}</h3>

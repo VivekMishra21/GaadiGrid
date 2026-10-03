@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { motion } from "motion/react";
 import { Clock, MapPin, ShieldCheck, Sparkles, Star } from "lucide-react";
 
 import { CATEGORY_LABELS } from "@/lib/backend/types";
@@ -9,12 +8,11 @@ export function ServiceCard({ entry }: { entry: CatalogueEntry }) {
   const { package: pkg, provider } = entry;
 
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 320, damping: 24 }}
+    <div
+      data-sponsored={provider.is_sponsored ? "" : undefined}
       className={
-        "group relative flex flex-col rounded-2xl border bg-card p-5 transition-colors " +
-        (provider.is_sponsored ? "border-brand-orange/40 hover:border-brand-orange/60" : "border-border hover:border-brand-green/40")
+        "lift-card group relative flex flex-col rounded-2xl border bg-card p-5 " +
+        (provider.is_sponsored ? "border-brand-orange/40" : "border-border")
       }
     >
       {provider.is_sponsored ? (
@@ -25,7 +23,7 @@ export function ServiceCard({ entry }: { entry: CatalogueEntry }) {
       ) : null}
 
       <div className="flex items-start justify-between gap-3">
-        <span className="flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green transition-colors group-hover:bg-brand-green group-hover:text-primary-foreground">
+        <span className="lift-icon flex size-11 items-center justify-center rounded-xl bg-brand-green/15 text-brand-green group-hover:bg-brand-green group-hover:text-primary-foreground">
           <Sparkles className="size-5" />
         </span>
         <span className="rounded-full border border-border px-2.5 py-1 text-xs font-semibold text-muted-foreground">
@@ -55,12 +53,12 @@ export function ServiceCard({ entry }: { entry: CatalogueEntry }) {
         <span className="text-lg font-bold text-foreground">₹{pkg.price.toFixed(0)}</span>
         <Link
           href={`/book/${provider.id}/${pkg.id}`}
-          className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/85 hover:shadow-lg hover:shadow-primary/20 active:scale-95"
+          className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-px hover:bg-primary/90 hover:shadow-md hover:shadow-primary/20 active:translate-y-0 active:scale-[0.98] motion-reduce:transition-none"
         >
           Book
         </Link>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

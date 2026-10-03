@@ -7,9 +7,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Typography scale: headings are Bold, labels/buttons SemiBold, body Regular. ExtraBold is
+     reserved for the GaadiGrid wordmark, so the utility is remapped to Bold everywhere else;
+     the wordmark opts in explicitly with font-[800]. */
+  --font-weight-extrabold: 700;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,40 +56,41 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* GaadiGrid brand palette (mobile/src/theme/colors.js) — this site is permanently
-   dark-navy, matching the app's established identity, so there is no light variant. */
+/* GaadiGrid brand palette — light, premium neutral base (no navy) with the brand's
+   emerald/orange accents carried over from mobile/src/theme/colors.js unchanged, so
+   the two platforms still share their green/orange identity. */
 :root {
-  --background: #102a43;
-  --foreground: #eaf0f5;
-  --card: #16324f;
-  --card-foreground: #eaf0f5;
-  --popover: #1c3b5c;
-  --popover-foreground: #eaf0f5;
+  --background: #f8faf9;
+  --foreground: #11181a;
+  --card: #ffffff;
+  --card-foreground: #11181a;
+  --popover: #ffffff;
+  --popover-foreground: #11181a;
   --primary: #18a875;
   --primary-foreground: #0b1b14;
-  --secondary: #1c3b5c;
-  --secondary-foreground: #eaf0f5;
-  --muted: #16324f;
-  --muted-foreground: #9fb2c4;
+  --secondary: #eef2f1;
+  --secondary-foreground: #11181a;
+  --muted: #eef2f1;
+  --muted-foreground: #5b6b78;
   --accent: #ff8a34;
   --accent-foreground: #1c0d00;
   --destructive: #d64545;
-  --border: #234868;
-  --input: #234868;
+  --border: #e2e8e6;
+  --input: #dde5e2;
   --ring: #18a875;
   --chart-1: #18a875;
   --chart-2: #ff8a34;
-  --chart-3: #9fb2c4;
-  --chart-4: #6c8299;
+  --chart-3: #5b6b78;
+  --chart-4: #8fa3ad;
   --chart-5: #d64545;
   --radius: 0.75rem;
-  --sidebar: #16324f;
-  --sidebar-foreground: #eaf0f5;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #11181a;
   --sidebar-primary: #18a875;
   --sidebar-primary-foreground: #0b1b14;
-  --sidebar-accent: #1c3b5c;
-  --sidebar-accent-foreground: #eaf0f5;
-  --sidebar-border: #234868;
+  --sidebar-accent: #eef2f1;
+  --sidebar-accent-foreground: #11181a;
+  --sidebar-border: #e2e8e6;
   --sidebar-ring: #18a875;
 
   --brand-green: #18a875;
@@ -102,9 +108,174 @@
   html {
     @apply font-sans;
   }
+  body {
+    font-weight: 400;
+  }
   h1,
-  h2 {
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-heading);
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  button,
+  [role="button"],
+  label {
+    font-weight: 600;
+  }
+}
+
+
+/* ------------------------------------------------------------------------------------------
+   Motion system. Tokens mirror src/lib/motion.ts. Only transform + opacity are animated.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-hover: 220ms;
+  --dur-reveal: 600ms;
+  --dur-page: 280ms;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(var(--reveal-y, 20px)) scale(0.98);
+  }
+}
+@keyframes fade-up-sm {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes gg-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gg-road {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}
+
+/* Scroll reveal: logical groups appear once. Elements already on screen at load are left alone,
+   so nothing flashes; the hidden state only exists once JS has armed an off-screen block. */
+.reveal[data-reveal="pending"],
+.reveal-group[data-reveal="pending"] > * {
+  opacity: 0;
+}
+.reveal[data-reveal="in"],
+.reveal-group[data-reveal="in"] > * {
+  animation: reveal-up var(--dur-reveal) var(--ease-premium) backwards;
+}
+.reveal-group[data-reveal="in"] > :nth-child(2) { animation-delay: 80ms; }
+.reveal-group[data-reveal="in"] > :nth-child(3) { animation-delay: 160ms; }
+.reveal-group[data-reveal="in"] > :nth-child(4) { animation-delay: 240ms; }
+.reveal-group[data-reveal="in"] > :nth-child(5) { animation-delay: 320ms; }
+.reveal-group[data-reveal="in"] > :nth-child(6) { animation-delay: 400ms; }
+.reveal-group[data-reveal="in"] > :nth-child(n + 7) { animation-delay: 480ms; }
+
+/* Lists whose children mount later (fetched data): each child rises in, in order. */
+.stagger-in > * {
+  animation: reveal-up var(--dur-reveal) var(--ease-premium) backwards;
+  --reveal-y: 16px;
+}
+.stagger-in > :nth-child(2) { animation-delay: 70ms; }
+.stagger-in > :nth-child(3) { animation-delay: 140ms; }
+.stagger-in > :nth-child(4) { animation-delay: 210ms; }
+.stagger-in > :nth-child(n + 5) { animation-delay: 280ms; }
+
+/* Auth forms: fields rise with a very small stagger after the card lands. */
+.auth-stagger > * {
+  animation: fade-up-sm 420ms var(--ease-premium) backwards;
+}
+.auth-stagger > :nth-child(1) { animation-delay: 380ms; }
+.auth-stagger > :nth-child(2) { animation-delay: 430ms; }
+.auth-stagger > :nth-child(3) { animation-delay: 480ms; }
+.auth-stagger > :nth-child(4) { animation-delay: 530ms; }
+.auth-stagger > :nth-child(5) { animation-delay: 580ms; }
+.auth-stagger > :nth-child(n + 6) { animation-delay: 620ms; }
+
+/* Service / module cards: clean at rest, a small lift toward emerald on hover. */
+.lift-card {
+  transition:
+    transform var(--dur-hover) var(--ease-premium),
+    box-shadow var(--dur-hover) var(--ease-premium),
+    border-color var(--dur-hover) var(--ease-premium);
+}
+.lift-card .lift-icon {
+  transition:
+    transform var(--dur-hover) var(--ease-premium),
+    background-color var(--dur-hover) var(--ease-premium),
+    color var(--dur-hover) var(--ease-premium);
+}
+@media (hover: hover) {
+  .lift-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px -16px rgba(17, 24, 26, 0.2);
+    border-color: color-mix(in oklch, var(--brand-green) 55%, var(--border));
+  }
+  .lift-card[data-sponsored]:hover {
+    border-color: color-mix(in oklch, var(--brand-orange) 60%, var(--border));
+  }
+  .lift-card:hover .lift-icon {
+    transform: scale(1.06) translateY(-1px);
+  }
+}
+.lift-card:has(:focus-visible) {
+  border-color: color-mix(in oklch, var(--brand-green) 55%, var(--border));
+}
+
+/* Route entrance (see MotionProvider): only after the first client-side navigation. */
+html[data-nav] main {
+  animation: page-in var(--dur-page) var(--ease-premium) backwards;
+}
+
+/* Loading mark: appears only if loading takes a moment, so quick loads never flash it. */
+.gg-loader {
+  opacity: 0;
+  animation: gg-fade-in 200ms ease-out 180ms forwards;
+}
+.gg-loader-road::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: var(--brand-green);
+  animation: gg-road 1.1s var(--ease-premium) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal[data-reveal="pending"],
+  .reveal-group[data-reveal="pending"] > * {
+    opacity: 1;
+  }
+  .reveal[data-reveal="in"],
+  .reveal-group[data-reveal="in"] > *,
+  .stagger-in > *,
+  .auth-stagger > *,
+  html[data-nav] main {
+    animation: none;
+  }
+  .lift-card:hover,
+  .lift-card:hover .lift-icon {
+    transform: none;
+  }
+  .gg-loader-road::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
   }
 }

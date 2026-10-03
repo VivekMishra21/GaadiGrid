@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
-function LogoMark({ className }: { className?: string }) {
+export function LogoMark({ className, tone = "default" }: { className?: string; tone?: "default" | "light" }) {
+  const light = tone === "light";
   return (
     <svg
       viewBox="0 0 1024 1024"
@@ -11,13 +12,13 @@ function LogoMark({ className }: { className?: string }) {
       <path
         d="M512,140 C 654,140 764,251 764,392 C 764,520 640,700 560,830 C 542,858 527,884 512,924 C 497,884 482,858 464,830 C 384,700 260,520 260,392 C 260,251 370,140 512,140 Z"
         fill="currentColor"
-        className="text-foreground"
+        className={light ? "text-white" : "text-foreground"}
       />
       <g transform="translate(512,340)">
         <rect x="-96" y="34" width="192" height="46" rx="23" fill="var(--brand-green)" />
-        <rect x="-72" y="46" width="40" height="10" rx="5" fill="var(--background)" />
-        <rect x="-8" y="46" width="40" height="10" rx="5" fill="var(--background)" />
-        <rect x="56" y="46" width="40" height="10" rx="5" fill="var(--background)" />
+        <rect x="-72" y="46" width="40" height="10" rx="5" fill={light ? "var(--foreground)" : "var(--background)"} />
+        <rect x="-8" y="46" width="40" height="10" rx="5" fill={light ? "var(--foreground)" : "var(--background)"} />
+        <rect x="56" y="46" width="40" height="10" rx="5" fill={light ? "var(--foreground)" : "var(--background)"} />
         <g transform="translate(-48,-94) rotate(-28)" fill="var(--brand-orange)">
           <rect x="-40" y="-70" width="80" height="50" rx="20" />
           <rect x="0" y="-26" width="16" height="34" rx="8" />
@@ -33,11 +34,26 @@ function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, wordmarkClassName }: { className?: string; wordmarkClassName?: string }) {
+export function Logo({
+  className,
+  wordmarkClassName,
+  tone = "default",
+}: {
+  className?: string;
+  wordmarkClassName?: string;
+  tone?: "default" | "light";
+}) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
-      <LogoMark />
-      <span className={cn("text-lg font-extrabold tracking-tight text-foreground", wordmarkClassName)}>
+      <LogoMark tone={tone} />
+      <span
+        className={cn(
+          tone === "light"
+            ? "text-lg font-[800] tracking-tight text-white"
+            : "bg-gradient-to-r from-brand-green via-brand-green to-brand-orange bg-clip-text text-lg font-[800] tracking-tight text-transparent",
+          wordmarkClassName
+        )}
+      >
         GaadiGrid
       </span>
     </span>

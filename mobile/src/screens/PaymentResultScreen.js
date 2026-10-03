@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Text } from '../components/AppText';
+import { Button } from '../components/Button';
 import { colors } from '../theme/colors';
 
 export function PaymentResultScreen({ route, navigation }) {
@@ -15,7 +16,7 @@ export function PaymentResultScreen({ route, navigation }) {
           ? 'Your booking is paid. The provider can now start the service at the scheduled time.'
           : 'The payment could not be completed. You can try again from your bookings.'}
       </Text>
-      <PrimaryButton title="Back to my bookings" onPress={() => navigation.navigate('BookingsList')} style={styles.button} />
+      <Button fullWidth onPress={() => navigation.navigate('BookingsList')} style={styles.button}>Back to my bookings</Button>
     </View>
   );
 }
@@ -34,8 +35,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     marginBottom: 10,
   },
   subtitle: {

@@ -4,12 +4,13 @@ export function requestOtp(phone) {
   return apiClient.post('/api/v1/auth/otp/request', { phone }).then((res) => res.data);
 }
 
-export function verifyOtp({ phone, otp, fullName, consents }) {
+export function verifyOtp({ phone, otp, fullName, email, consents }) {
   return apiClient
     .post('/api/v1/auth/otp/verify', {
       phone,
       otp,
       full_name: fullName,
+      ...(email ? { email } : {}),
       consents: consents || [],
     })
     .then((res) => res.data);

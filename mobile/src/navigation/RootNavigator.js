@@ -8,6 +8,7 @@ import { LocationPermissionScreen } from '../screens/LocationPermissionScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { OnboardingScreen, ONBOARDING_SEEN_KEY } from '../screens/OnboardingScreen';
 import { OtpScreen } from '../screens/OtpScreen';
+import { SignupScreen } from '../screens/SignupScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { useAuthStore } from '../store/authStore';
 import { useVehicleStore } from '../store/vehicleStore';
@@ -27,6 +28,9 @@ export function RootNavigator() {
 
   const [onboardingSeen, setOnboardingSeen] = useState(null);
   const [locationAsked, setLocationAsked] = useState(null);
+  const [splashDone, setSplashDone] = useState(false);
+  // Where a signed-out user lands once onboarding is done (or was already seen).
+  const [authStart, setAuthStart] = useState('Login');
 
   useEffect(() => {
     bootstrap();
@@ -35,6 +39,7 @@ export function RootNavigator() {
 
   useEffect(() => {
     if (authStatus !== 'signed_in') return;
+    setAuthStart('Login'); // after a later logout, land on Login rather than Signup
     AsyncStorage.getItem(LOCATION_ASKED_KEY).then((v) => setLocationAsked(v === 'true'));
     fetchVehicles().catch(() => {});
     registerForPushNotificationsAsync();
@@ -45,8 +50,8 @@ export function RootNavigator() {
     setLocationAsked(true);
   }
 
-  if (authStatus === 'loading' || onboardingSeen === null) {
-    return <SplashScreen />;
+  if (!splashDone || authStatus === 'loading' || onboardingSeen === null) {
+    return <SplashScreen onFinish={() => setSplashDone(true)} />;
   }
 
   const needsOnboarding = authStatus === 'signed_out' && !onboardingSeen;
@@ -65,10 +70,28 @@ export function RootNavigator() {
           <>
             {needsOnboarding ? (
               <Stack.Screen name="Onboarding">
-                {() => <OnboardingScreen onDone={() => setOnboardingSeen(true)} />}
+                {() => (
+                  <OnboardingScreen
+                    onDone={(target) => {
+                      setAuthStart(target || 'Signup');
+                      setOnboardingSeen(true);
+                    }}
+                  />
+                )}
               </Stack.Screen>
             ) : null}
-            <Stack.Screen name="Login" component={LoginScreen} />
+            {/* A navigator's initial route is fixed at mount, so the first declared screen is the landing one. */}
+            {authStart === 'Signup' ? (
+              <>
+                <Stack.Screen name="Signup" component={SignupScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="Signup" component={SignupScreen} />
+              </>
+            )}
             <Stack.Screen name="Otp" component={OtpScreen} />
           </>
         ) : needsLocationPrompt ? (

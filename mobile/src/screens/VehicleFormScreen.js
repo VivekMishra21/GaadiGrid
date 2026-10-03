@@ -1,5 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
 import { VehicleForm } from '../components/VehicleForm';
 import { useVehicleStore } from '../store/vehicleStore';
 import { colors } from '../theme/colors';
@@ -62,8 +63,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     marginBottom: 20,
   },
 });

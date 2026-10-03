@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 
+import { Text } from './AppText';
 import { FUEL_TYPES, VEHICLE_TYPES, validateVehicleForm } from '../constants/vehicle';
 import { colors } from '../theme/colors';
 import { ChipGroup } from './Chip';
-import { PrimaryButton } from './PrimaryButton';
+import { Button } from './Button';
 import { TextField } from './TextField';
 
 const EMPTY_FORM = {
@@ -123,7 +124,7 @@ export function VehicleForm({ initialValues, submitLabel = 'Save vehicle', onSub
 
       {submitError ? <Text style={styles.submitError}>{submitError}</Text> : null}
 
-      <PrimaryButton title={submitLabel} onPress={handleSubmit} loading={submitting} style={styles.submit} />
+      <Button fullWidth onPress={handleSubmit} loading={submitting} style={styles.submit}>{submitLabel}</Button>
     </ScrollView>
   );
 }

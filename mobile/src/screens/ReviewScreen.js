@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
+import { LoadingMark } from '../components/LoadingMark';
 import { getReview, submitReview } from '../api/bookingsApi';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { colors } from '../theme/colors';
 
@@ -66,7 +68,7 @@ export function ReviewScreen({ route, navigation }) {
   if (existing === undefined) {
     return (
       <View style={styles.container}>
-        <Text style={styles.muted}>Loading...</Text>
+        <LoadingMark />
       </View>
     );
   }
@@ -102,7 +104,7 @@ export function ReviewScreen({ route, navigation }) {
             style={{ marginTop: 16 }}
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <PrimaryButton title="Submit review" onPress={handleSubmit} loading={submitting} style={{ marginTop: 8 }} />
+          <Button fullWidth onPress={handleSubmit} loading={submitting} style={{ marginTop: 8 }}>Submit review</Button>
         </View>
       )}
     </ScrollView>
@@ -123,8 +125,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   subheading: {
     color: colors.textSecondary,
@@ -136,7 +139,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 18,
   },
   starRow: {

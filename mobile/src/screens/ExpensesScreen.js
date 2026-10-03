@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
+import { LoadingMark } from '../components/LoadingMark';
 import { createExpense, deleteExpense, getExpenseSummary, listExpenses } from '../api/expensesApi';
 import { ChipGroup } from '../components/Chip';
 import { EmptyState } from '../components/EmptyState';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { colors } from '../theme/colors';
 
@@ -126,13 +128,13 @@ export function ExpensesScreen({ route }) {
               />
               <TextField label="Note (optional)" value={form.note} onChangeText={(v) => setForm((p) => ({ ...p, note: v }))} />
               {error ? <Text style={styles.error}>{error}</Text> : null}
-              <PrimaryButton title="Save expense" onPress={handleAdd} loading={saving} style={{ marginTop: 4 }} />
+              <Button fullWidth onPress={handleAdd} loading={saving} style={{ marginTop: 4 }}>Save expense</Button>
               <TouchableOpacity onPress={() => setShowAddForm(false)} style={{ marginTop: 10 }}>
                 <Text style={styles.cancelLink}>Cancel</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <PrimaryButton title="+ Add expense" onPress={() => setShowAddForm(true)} variant="secondary" style={styles.addButton} />
+            <Button fullWidth onPress={() => setShowAddForm(true)} variant="secondary" style={styles.addButton}>+ Add expense</Button>
           )}
         </>
       }
@@ -151,7 +153,7 @@ export function ExpensesScreen({ route }) {
       )}
       ListEmptyComponent={
         expenses === null ? (
-          <Text style={styles.muted}>Loading...</Text>
+          <LoadingMark />
         ) : (
           <EmptyState title="No expenses logged yet" subtitle="Track fuel, service, insurance and other costs for this vehicle." />
         )
@@ -169,8 +171,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   subheading: {
     color: colors.textSecondary,
@@ -182,7 +185,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 16,
     marginBottom: 16,
   },
@@ -203,7 +211,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 16,
     marginBottom: 20,
   },
@@ -223,7 +236,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 14,
     marginBottom: 10,
   },

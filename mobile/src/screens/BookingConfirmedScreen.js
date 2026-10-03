@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Text } from '../components/AppText';
+import { Button } from '../components/Button';
 import { colors } from '../theme/colors';
 
 export function BookingConfirmedScreen({ navigation }) {
@@ -11,7 +12,7 @@ export function BookingConfirmedScreen({ navigation }) {
       <Text style={styles.subtitle}>
         The provider will confirm your booking shortly. You can track its status from the Bookings tab.
       </Text>
-      <PrimaryButton title="View my bookings" onPress={() => navigation.navigate('Bookings')} style={styles.button} />
+      <Button fullWidth onPress={() => navigation.navigate('Bookings')} style={styles.button}>View my bookings</Button>
     </View>
   );
 }
@@ -31,8 +32,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     marginBottom: 10,
   },
   subtitle: {

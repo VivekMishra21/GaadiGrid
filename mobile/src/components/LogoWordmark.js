@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from './AppText';
 import { Logo } from './Logo';
 import { colors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
 
 export function LogoWordmark({ size = 40, variant = 'dark', showTagline = false }) {
   const textColor = variant === 'dark' ? colors.textPrimary : colors.bg;
@@ -24,15 +26,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
+  // The one place ExtraBold is used (see theme/fonts.js).
   text: {
+    fontFamily: fonts.extrabold,
     fontSize: 22,
-    fontWeight: '700',
     letterSpacing: -0.4,
   },
   tagline: {
     fontSize: 11,
     fontWeight: '500',
-    color: '#9FB2C4',
+    color: colors.textMuted,
     letterSpacing: 0.2,
   },
 });

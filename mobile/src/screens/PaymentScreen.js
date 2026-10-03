@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from '../components/AppText';
 import { createPaymentOrder, devCompletePayment, getPaymentOrder } from '../api/paymentsApi';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Button } from '../components/Button';
 import { colors } from '../theme/colors';
 
 export function PaymentScreen({ route, navigation }) {
@@ -69,8 +70,8 @@ export function PaymentScreen({ route, navigation }) {
 
       {status === 'ready' ? (
         <>
-          <PrimaryButton title={`Pay ₹${Number(amount).toFixed(2)} (simulated)`} onPress={() => handlePay(true)} loading={paying} style={styles.payButton} />
-          <PrimaryButton title="Simulate a failed payment" onPress={() => handlePay(false)} variant="secondary" disabled={paying} style={styles.failButton} />
+          <Button fullWidth onPress={() => handlePay(true)} loading={paying} style={styles.payButton}>{`Pay ₹${Number(amount).toFixed(2)} (simulated)`}</Button>
+          <Button fullWidth onPress={() => handlePay(false)} variant="secondary" disabled={paying} style={styles.failButton}>Simulate a failed payment</Button>
         </>
       ) : null}
     </View>
@@ -88,7 +89,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 20,
     alignItems: 'center',
   },

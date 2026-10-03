@@ -10,6 +10,15 @@ export const SERVICE_CATEGORIES = [
   { value: 'OTHER', label: 'Other' },
 ];
 
+// Mirrors the website's Car Wash / Vehicle Care split (website/src/lib/backend/types.ts).
+export const SERVICE_GROUPS = {
+  CAR_WASH: { label: 'Car Wash', categories: ['CAR_WASH', 'DETAILING'] },
+  VEHICLE_CARE: {
+    label: 'Vehicle Care',
+    categories: ['AC_SERVICE', 'DENTING_PAINTING', 'GENERAL_SERVICE', 'TYRE_SERVICE', 'BATTERY_SERVICE', 'OTHER'],
+  },
+};
+
 export function categoryLabel(value) {
   return SERVICE_CATEGORIES.find((c) => c.value === value)?.label || value;
 }

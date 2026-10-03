@@ -1,13 +1,18 @@
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
+import { LoadingMark } from '../components/LoadingMark';
 import { submitQueueReport } from '../api/stationsApi';
 import { ChipGroup } from '../components/Chip';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Button } from '../components/Button';
 import { CNG_REPORT_OPTIONS, QUEUE_REPORT_OPTIONS, queueSignalColor } from '../constants/queue';
 import { useStationStore } from '../store/stationStore';
 import { colors } from '../theme/colors';
+import { Icon } from '../components/Icon';
+import { IconBadge } from '../components/IconBadge';
+import { radius, shadow } from '../theme/tokens';
 
 function SignalRow({ label, signal }) {
   if (!signal?.value) {
@@ -51,7 +56,7 @@ export function StationDetailScreen({ route, navigation }) {
   if (stationDetailStatus === 'loading' && (!stationDetail || stationDetail.id !== stationId)) {
     return (
       <View style={styles.container}>
-        <Text style={styles.muted}>Loading station...</Text>
+        <LoadingMark />
       </View>
     );
   }
@@ -60,7 +65,7 @@ export function StationDetailScreen({ route, navigation }) {
     return (
       <View style={styles.container}>
         <Text style={styles.muted}>Couldn&apos;t load this station.</Text>
-        <PrimaryButton title="Retry" onPress={load} variant="secondary" style={{ marginTop: 16, marginHorizontal: 20 }} />
+        <Button fullWidth onPress={load} variant="secondary" style={{ marginTop: 16, marginHorizontal: 20 }}>Retry</Button>
       </View>
     );
   }
@@ -116,10 +121,17 @@ export function StationDetailScreen({ route, navigation }) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.header}>
+        <IconBadge name="fuel" size={56} />
         <View style={{ flex: 1 }}>
           <Text style={styles.name}>{station.name}</Text>
-          <Text style={styles.address}>{station.address}</Text>
-          <Text style={styles.hours}>{station.is_24_hours ? 'Open 24 hours' : `${station.opens_at || '?'} - ${station.closes_at || '?'}`}</Text>
+          <View style={styles.rowIcon}>
+            <Icon name="mapPin" size={13} color={colors.textMuted} />
+            <Text style={styles.address}>{station.address}</Text>
+          </View>
+          <View style={styles.rowIcon}>
+            <Icon name="clock" size={13} color={colors.greenDark} />
+            <Text style={styles.hours}>{station.is_24_hours ? 'Open 24 hours' : `${station.opens_at || '?'} - ${station.closes_at || '?'}`}</Text>
+          </View>
         </View>
         <TouchableOpacity
           onPress={handleFavorite}
@@ -128,17 +140,13 @@ export function StationDetailScreen({ route, navigation }) {
           accessibilityLabel={station.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
           accessibilityState={{ selected: station.is_favorite, disabled: favoriteBusy }}
         >
-          <Text
-            style={[styles.favoriteStar, station.is_favorite && styles.favoriteStarActive]}
-            accessibilityElementsHidden
-            importantForAccessibility="no"
-          >
-            ★
-          </Text>
+          <View style={[styles.favoriteBtn, station.is_favorite && styles.favoriteBtnActive]}>
+            <Icon name="star" size={20} color={station.is_favorite ? colors.orange : colors.textMuted} fill={station.is_favorite ? colors.orange : 'none'} />
+          </View>
         </TouchableOpacity>
       </View>
 
-      <PrimaryButton title="Navigate here" onPress={handleNavigate} style={styles.navigateButton} />
+      <Button fullWidth leftIcon={<Icon name="navigation" />} onPress={handleNavigate} style={styles.navigateButton}>Navigate here</Button>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Fuel prices</Text>
@@ -182,13 +190,7 @@ export function StationDetailScreen({ route, navigation }) {
         <ChipGroup label="CNG status" options={CNG_REPORT_OPTIONS} value={reportType} onChange={setReportType} />
         {reportError ? <Text style={styles.reportError}>{reportError}</Text> : null}
         {reportSuccess ? <Text style={styles.reportSuccess}>Thanks — your report has been submitted.</Text> : null}
-        <PrimaryButton
-          title="Submit report"
-          onPress={handleSubmitReport}
-          loading={submitting}
-          disabled={!reportType}
-          style={{ marginTop: 8 }}
-        />
+        <Button fullWidth onPress={handleSubmitReport} loading={submitting} disabled={!reportType} style={{ marginTop: 8 }}>Submit report</Button>
       </View>
 
       <TouchableOpacity onPress={() => navigation.navigate('DetourCalculator', { stationPrices: station.prices })} style={styles.calculatorLink}>
@@ -203,46 +205,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: 24,
+  header: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingTop: 8 },
+  name: { color: colors.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: -0.4 },
+  rowIcon: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 5 },
+  address: { color: colors.textSecondary, fontSize: 13, flexShrink: 1 },
+  hours: { color: colors.greenDark, fontSize: 12, fontWeight: '700' },
+  favoriteBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  name: {
-    color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  address: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    marginTop: 4,
-  },
-  hours: {
-    color: colors.textMuted,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  favoriteStar: {
-    fontSize: 26,
-    color: colors.textMuted,
-  },
-  favoriteStarActive: {
-    color: colors.orange,
-  },
+  favoriteBtnActive: { backgroundColor: colors.orangeSoft, borderColor: 'rgba(255,138,52,0.5)' },
   navigateButton: {
     marginHorizontal: 20,
     marginTop: 16,
   },
   section: {
     marginHorizontal: 20,
-    marginTop: 24,
+    marginTop: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: 16,
+    ...shadow.card,
   },
   sectionTitle: {
     color: colors.textPrimary,
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     marginBottom: 8,
   },
   sectionSubtitle: {

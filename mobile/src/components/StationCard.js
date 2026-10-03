@@ -1,7 +1,11 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from './AppText';
 import { queueSignalColor } from '../constants/queue';
 import { colors } from '../theme/colors';
+import { radius, shadow } from '../theme/tokens';
+import { Icon } from './Icon';
+import { IconBadge } from './IconBadge';
 
 function cheapestPrice(prices) {
   if (!prices || prices.length === 0) return null;
@@ -26,41 +30,50 @@ export function StationCard({ station, onPress }) {
     .join('. ');
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.88} onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
       <View style={styles.header} importantForAccessibility="no-hide-descendants">
+        <IconBadge name="fuel" size={46} />
         <View style={styles.titleBlock}>
           <Text style={styles.name} numberOfLines={1}>
             {station.name}
           </Text>
-          <Text style={styles.address} numberOfLines={1}>
-            {station.locality ? `${station.locality}, ${station.city}` : station.city}
-          </Text>
+          <View style={styles.addressRow}>
+            <Icon name="mapPin" size={13} color={colors.textMuted} />
+            <Text style={styles.address} numberOfLines={1}>
+              {station.locality ? `${station.locality}, ${station.city}` : station.city}
+            </Text>
+          </View>
         </View>
-        {station.is_favorite ? <Text style={styles.favoriteStar}>★</Text> : null}
+        {station.is_favorite ? <Icon name="star" size={18} color={colors.orange} fill={colors.orange} /> : null}
+        {station.distance_km != null ? (
+          <View style={styles.distancePill}>
+            <Text style={styles.distance}>{station.distance_km} km</Text>
+          </View>
+        ) : null}
       </View>
 
-      <View style={styles.metaRow} importantForAccessibility="no-hide-descendants">
-        {station.distance_km != null ? <Text style={styles.distance}>{station.distance_km} km away</Text> : null}
+      <View style={styles.footer} importantForAccessibility="no-hide-descendants">
         {cheapest ? (
-          <Text style={styles.price}>
-            {cheapest.fuel_type_code} ₹{cheapest.price.toFixed(2)}
-          </Text>
+          <View style={styles.priceBlock}>
+            <Text style={styles.fuelCode}>{cheapest.fuel_type_code}</Text>
+            <Text style={styles.price}>₹{cheapest.price.toFixed(2)}</Text>
+          </View>
         ) : (
           <Text style={styles.priceMuted}>No prices yet</Text>
         )}
-      </View>
 
-      <View style={styles.queueRow} importantForAccessibility="no-hide-descendants">
-        {queue?.value ? (
-          <>
-            <View style={[styles.dot, { backgroundColor: queueSignalColor(queue.value) }]} />
-            <Text style={styles.queueText}>
-              {queue.label} · {queue.last_reported_minutes_ago}m ago
-            </Text>
-          </>
-        ) : (
-          <Text style={styles.queueMuted}>No recent queue reports</Text>
-        )}
+        <View style={styles.queueRow}>
+          {queue?.value ? (
+            <>
+              <View style={[styles.dot, { backgroundColor: queueSignalColor(queue.value) }]} />
+              <Text style={styles.queueText}>
+                {queue.label} · {queue.last_reported_minutes_ago}m ago
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.queueMuted}>No recent queue reports</Text>
+          )}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -71,70 +84,35 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: radius.lg,
     padding: 14,
     marginHorizontal: 16,
     marginBottom: 12,
+    ...shadow.card,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  titleBlock: {
-    flex: 1,
-    marginRight: 8,
-  },
-  name: {
-    color: colors.textPrimary,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  address: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  favoriteStar: {
-    color: colors.orange,
-    fontSize: 16,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  distance: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  price: {
-    color: colors.green,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  priceMuted: {
-    color: colors.textMuted,
-    fontSize: 12,
-  },
-  queueRow: {
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  titleBlock: { flex: 1 },
+  name: { color: colors.textPrimary, fontSize: 15, fontWeight: '800' },
+  addressRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
+  address: { color: colors.textSecondary, fontSize: 12, flexShrink: 1 },
+  distancePill: { backgroundColor: colors.greenSoft, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5 },
+  distance: { color: colors.greenDark, fontSize: 12, fontWeight: '800' },
+  footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    justifyContent: 'space-between',
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: 10,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  queueText: {
-    color: colors.textSecondary,
-    fontSize: 12,
-  },
-  queueMuted: {
-    color: colors.textMuted,
-    fontSize: 12,
-  },
+  priceBlock: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  fuelCode: { color: colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 0.6 },
+  price: { color: colors.textPrimary, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
+  priceMuted: { color: colors.textMuted, fontSize: 12 },
+  queueRow: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
+  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+  queueText: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  queueMuted: { color: colors.textMuted, fontSize: 12 },
 });

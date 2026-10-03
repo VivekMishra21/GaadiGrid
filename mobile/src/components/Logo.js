@@ -1,6 +1,6 @@
 import Svg, { Path, Rect, Circle, G } from 'react-native-svg';
 
-export function Logo({ size = 64, pinColor = '#102A43' }) {
+export function Logo({ size = 64, pinColor = '#11181A' }) {
   // Purely decorative — every place this is used (LogoWordmark) already shows the
   // "GaadiGrid" name as real, visible text right next to it, so a screen reader
   // shouldn't announce this icon separately.

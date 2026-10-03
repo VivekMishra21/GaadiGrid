@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Text } from '../components/AppText';
+import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { useVehicleStore } from '../store/vehicleStore';
 import { colors } from '../theme/colors';
@@ -85,7 +86,7 @@ export function DetourCalculatorScreen({ route }) {
         error={result && !result.valid ? result.errors.fillUnits : null}
       />
 
-      <PrimaryButton title="Calculate" onPress={handleCalculate} style={{ marginTop: 8 }} />
+      <Button fullWidth onPress={handleCalculate} style={{ marginTop: 8 }}>Calculate</Button>
 
       {result?.valid && (
         <View style={[styles.resultCard, result.worthIt ? styles.resultGood : styles.resultBad]}>
@@ -120,8 +121,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   subtitle: {
     color: colors.textSecondary,

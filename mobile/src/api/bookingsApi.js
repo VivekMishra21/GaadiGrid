@@ -4,8 +4,10 @@ export function createBooking(payload) {
   return apiClient.post('/api/v1/bookings', payload).then((res) => res.data);
 }
 
-export function listMyBookings(page = 1) {
-  return apiClient.get('/api/v1/bookings/mine', { params: { page, page_size: 20 } }).then((res) => res.data);
+export function listMyBookings(page = 1, vehicleId = null) {
+  const params = { page, page_size: 20 };
+  if (vehicleId) params.vehicle_id = vehicleId;
+  return apiClient.get('/api/v1/bookings/mine', { params }).then((res) => res.data);
 }
 
 export function cancelBooking(id, reason) {

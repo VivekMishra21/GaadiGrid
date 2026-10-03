@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Text } from '../components/AppText';
 import { VehicleForm } from '../components/VehicleForm';
 import { useVehicleStore } from '../store/vehicleStore';
 import { colors } from '../theme/colors';
@@ -14,8 +15,8 @@ export function AddVehicleScreen({ onDone }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add your vehicle</Text>
-      <Text style={styles.body}>This helps us show accurate mileage-based savings and service reminders.</Text>
+      <Text style={styles.title}>Let&apos;s start with your car.</Text>
+      <Text style={styles.body}>Adding your vehicle lets GaadiGrid connect fuel, services, bookings, expenses and reminders to it. You can add more vehicles later from My Garage.</Text>
 
       <VehicleForm onSubmit={handleSubmit} submitLabel="Save and continue" showDefaultToggle={false} />
     </View>
@@ -31,8 +32,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     marginBottom: 6,
   },
   body: {

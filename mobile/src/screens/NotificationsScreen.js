@@ -1,14 +1,25 @@
 import { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
+import { LoadingMark } from '../components/LoadingMark';
 import { listNotifications, markAllNotificationsRead, markNotificationRead } from '../api/notificationsApi';
 import { EmptyState } from '../components/EmptyState';
+import { IconBadge } from '../components/IconBadge';
 import { colors } from '../theme/colors';
 
 function formatDateTime(iso) {
   return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 }
+
+const TYPE_ICON = {
+  REMINDER_INSURANCE: 'shieldCheck',
+  REMINDER_PUC: 'badgeCheck',
+  REMINDER_SERVICE: 'wrench',
+  BOOKING_UPDATE: 'calendarCheck',
+  GENERIC: 'bell',
+};
 
 function NotificationRow({ notification, onPress }) {
   const unread = notification.read_at === null;
@@ -22,9 +33,12 @@ function NotificationRow({ notification, onPress }) {
       accessibilityLabel={label}
       accessibilityState={{ disabled: !unread }}
     >
-      {unread ? <View style={styles.unreadDot} /> : <View style={styles.unreadDotSpacer} />}
+      <IconBadge name={TYPE_ICON[notification.type] || 'bell'} tone={unread ? 'orange' : 'neutral'} size={42} />
       <View style={{ flex: 1 }} importantForAccessibility="no-hide-descendants">
-        <Text style={styles.title}>{notification.title}</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{notification.title}</Text>
+          {unread ? <View style={styles.unreadDot} /> : null}
+        </View>
         <Text style={styles.body}>{notification.body}</Text>
         <Text style={styles.time}>{formatDateTime(notification.created_at)}</Text>
       </View>
@@ -80,9 +94,9 @@ export function NotificationsScreen() {
         renderItem={({ item }) => <NotificationRow notification={item} onPress={handlePress} />}
         ListEmptyComponent={
           notifications === null ? (
-            <Text style={styles.muted}>Loading...</Text>
+            <LoadingMark />
           ) : (
-            <EmptyState title="No notifications yet" subtitle="Reminders and booking updates will show up here." />
+            <EmptyState icon="bell" title="No notifications yet" subtitle="Reminders and booking updates will show up here." />
           )
         }
       />
@@ -91,6 +105,7 @@ export function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -105,8 +120,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   markAllLink: {
     color: colors.green,
@@ -116,10 +132,16 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    gap: 12,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 14,
     marginHorizontal: 16,
     marginBottom: 10,
@@ -128,9 +150,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.green,
-    marginTop: 5,
-    marginRight: 10,
+    backgroundColor: colors.orange,
   },
   unreadDotSpacer: {
     width: 8,

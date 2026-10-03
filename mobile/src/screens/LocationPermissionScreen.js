@@ -1,8 +1,9 @@
 import * as Location from 'expo-location';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Text } from '../components/AppText';
+import { Button } from '../components/Button';
 import { colors } from '../theme/colors';
 
 export function LocationPermissionScreen({ onDone }) {
@@ -32,8 +33,8 @@ export function LocationPermissionScreen({ onDone }) {
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <PrimaryButton title="Allow location access" onPress={handleAllow} loading={requesting} style={styles.cta} />
-      <PrimaryButton title="Not now" onPress={onDone} variant="secondary" style={styles.skip} />
+      <Button fullWidth onPress={handleAllow} loading={requesting} style={styles.cta}>Allow location access</Button>
+      <Button fullWidth onPress={onDone} variant="ghost" style={styles.skip}>Not now</Button>
     </View>
   );
 }
@@ -48,8 +49,9 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
     textAlign: 'center',
     marginBottom: 12,
   },

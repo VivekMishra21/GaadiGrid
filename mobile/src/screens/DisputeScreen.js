@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { Text } from '../components/AppText';
 import { listDisputes, raiseDispute } from '../api/bookingsApi';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { Button } from '../components/Button';
 import { TextField } from '../components/TextField';
 import { colors } from '../theme/colors';
 
@@ -78,7 +79,7 @@ export function DisputeScreen({ route, navigation }) {
         <View style={styles.card}>
           <TextField label="What went wrong?" value={reason} onChangeText={setReason} multiline />
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <PrimaryButton title="Submit report" onPress={handleSubmit} loading={submitting} style={{ marginTop: 4 }} />
+          <Button fullWidth onPress={handleSubmit} loading={submitting} style={{ marginTop: 4 }}>Submit report</Button>
         </View>
       ) : (
         <Text style={styles.muted}>You already have an open report for this booking — GaadiGrid admin will follow up.</Text>
@@ -101,8 +102,9 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 26,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   subheading: {
     color: colors.textSecondary,
@@ -114,7 +116,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#11181A',
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 2,
     padding: 18,
     marginBottom: 16,
   },

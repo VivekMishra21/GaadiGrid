@@ -24,10 +24,10 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  async completeOtpLogin({ phone, otp, fullName, consents }) {
+  async completeOtpLogin({ phone, otp, fullName, email, consents }) {
     set({ error: null });
     try {
-      const result = await apiVerifyOtp({ phone, otp, fullName, consents });
+      const result = await apiVerifyOtp({ phone, otp, fullName, email, consents });
       await storeTokens(result.access_token, result.refresh_token);
       set({ status: 'signed_in', user: result.user });
       return result;

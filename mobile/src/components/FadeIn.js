@@ -9,7 +9,7 @@ import { motion, nativeDriver } from '../theme/motion';
  * field) — not every line of text. Stagger siblings with `delay`. With reduced motion the content
  * simply shows.
  */
-export function FadeIn({ children, delay = 0, distance = motion.distance.sm, duration = motion.duration.base, scaleFrom = 1, style, testID }) {
+export function FadeIn({ children, delay = 0, distance = motion.distance.sm, duration = motion.duration.base, scaleFrom = 1, style, ...rest }) {
   const reduced = useReducedMotion();
   const progress = useRef(new Animated.Value(0)).current;
 
@@ -27,7 +27,7 @@ export function FadeIn({ children, delay = 0, distance = motion.distance.sm, dur
   if (scaleFrom !== 1) transform.push({ scale: progress.interpolate({ inputRange: [0, 1], outputRange: [scaleFrom, 1] }) });
 
   return (
-    <Animated.View testID={testID} style={[{ opacity: progress, transform }, style]}>
+    <Animated.View {...rest} style={[{ opacity: progress, transform }, style]}>
       {children}
     </Animated.View>
   );

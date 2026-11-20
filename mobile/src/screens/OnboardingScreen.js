@@ -157,14 +157,14 @@ export function OnboardingScreen({ onDone }) {
   const isFirst = index === 0;
   const isLast = index === slides.length - 1;
 
-  async function finish(target = 'Signup') {
+  async function finish(target = 'Gateway') {
     await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
     onDone(target);
   }
 
   function goNext() {
     if (isLast) {
-      finish('Signup');
+      finish('Gateway');
       return;
     }
     const next = index + 1;
@@ -175,7 +175,7 @@ export function OnboardingScreen({ onDone }) {
   return (
     <View style={styles.container}>
       {!isFirst ? (
-        <TouchableOpacity style={styles.skip} onPress={() => finish('Signup')} accessibilityRole="button">
+        <TouchableOpacity style={styles.skip} onPress={() => finish('Gateway')} accessibilityRole="button">
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       ) : null}
@@ -198,9 +198,11 @@ export function OnboardingScreen({ onDone }) {
         {slides.map((slide, i) => (
           <View key={slide.key} style={[styles.dot, i === index && styles.dotActive]} />
         ))}
+        {/* the final step (the gateway) comes right after the last slide */}
+        <View style={styles.dot} />
       </View>
 
-      <Button fullWidth onPress={goNext} style={styles.cta}>{isFirst ? 'Get Started' : isLast ? 'Create your account' : 'Next'}</Button>
+      <Button fullWidth onPress={goNext} style={styles.cta}>{isFirst ? 'Get Started' : isLast ? 'Continue' : 'Next'}</Button>
       {isFirst ? (
         <TouchableOpacity onPress={() => finish('Login')} style={styles.loginLink} accessibilityRole="button">
           <Text style={styles.loginText}>Log in</Text>

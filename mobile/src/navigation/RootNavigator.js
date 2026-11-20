@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 
 import { AddVehicleScreen } from '../screens/AddVehicleScreen';
 import { LocationPermissionScreen } from '../screens/LocationPermissionScreen';
+import { AuthGatewayScreen } from '../screens/AuthGatewayScreen';
+import { HelpScreen } from '../screens/HelpScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { OnboardingScreen, ONBOARDING_SEEN_KEY } from '../screens/OnboardingScreen';
 import { OtpScreen } from '../screens/OtpScreen';
@@ -17,6 +19,24 @@ import { MainTabs } from './MainTabs';
 
 const LOCATION_ASKED_KEY = 'gaadigrid_location_asked';
 const Stack = createNativeStackNavigator();
+
+// Which sign-in screen is declared first decides where a signed-out user lands. After onboarding that is
+// the gateway (the final onboarding step); a returning user lands straight on Login.
+const AUTH_SCREENS = {
+  Gateway: [
+    ['Gateway', AuthGatewayScreen],
+    ['Signup', SignupScreen],
+    ['Login', LoginScreen],
+  ],
+  Signup: [
+    ['Signup', SignupScreen],
+    ['Login', LoginScreen],
+  ],
+  Login: [
+    ['Login', LoginScreen],
+    ['Signup', SignupScreen],
+  ],
+};
 const screenOptions = { headerShown: false };
 
 export function RootNavigator() {
@@ -73,7 +93,7 @@ export function RootNavigator() {
                 {() => (
                   <OnboardingScreen
                     onDone={(target) => {
-                      setAuthStart(target || 'Signup');
+                      setAuthStart(target || 'Gateway');
                       setOnboardingSeen(true);
                     }}
                   />
@@ -81,18 +101,11 @@ export function RootNavigator() {
               </Stack.Screen>
             ) : null}
             {/* A navigator's initial route is fixed at mount, so the first declared screen is the landing one. */}
-            {authStart === 'Signup' ? (
-              <>
-                <Stack.Screen name="Signup" component={SignupScreen} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Signup" component={SignupScreen} />
-              </>
-            )}
+            {AUTH_SCREENS[authStart].map(([name, component]) => (
+              <Stack.Screen key={name} name={name} component={component} />
+            ))}
             <Stack.Screen name="Otp" component={OtpScreen} />
+            <Stack.Screen name="Help" component={HelpScreen} />
           </>
         ) : needsLocationPrompt ? (
           <Stack.Screen name="LocationPermission">

@@ -32,7 +32,8 @@
       "expo-secure-store",
       "expo-notifications",
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-video"
     ]
   }
 }

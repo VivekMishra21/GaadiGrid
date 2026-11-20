@@ -1,3 +1,4 @@
+import { haptic } from '../utils/haptics';
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { Text } from './AppText';
@@ -21,7 +22,10 @@ export function VehicleSwitcher({ onAdd }) {
         return (
           <TouchableOpacity
             key={vehicle.id}
-            onPress={() => selectVehicle(vehicle.id)}
+            onPress={() => {
+              haptic.select();
+              selectVehicle(vehicle.id);
+            }}
             style={[styles.pill, selected && styles.pillSelected]}
             accessibilityRole="button"
             accessibilityLabel={`${vehicleTitle(vehicle)}, ${vehicle.registration_number}`}

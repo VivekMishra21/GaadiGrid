@@ -9,6 +9,8 @@ import { PassportView } from '../components/PassportView';
 import { MonthlyBars, ReminderRow, TimelineList } from '../components/VehicleActivity';
 import { Button } from '../components/Button';
 import { FadeIn } from '../components/FadeIn';
+import { VehicleIntelligenceCard } from '../components/vehicle/VehicleIntelligenceCard';
+import { VehicleViewer } from '../components/vehicle/VehicleViewer';
 import { Icon } from '../components/Icon';
 import { IconBadge } from '../components/IconBadge';
 import { VehicleSwitcher } from '../components/VehicleSwitcher';
@@ -64,7 +66,7 @@ export function GarageScreen({ navigation, route }) {
   const vehicle = useVehicleStore(selectCurrentVehicle);
   const fetchVehicles = useVehicleStore((s) => s.fetchVehicles);
   const removeVehicle = useVehicleStore((s) => s.removeVehicle);
-  const insights = useVehicleInsights(vehicle?.id, { timelineLimit: 50, months: 6 });
+  const insights = useVehicleInsights(vehicle?.id, { timelineLimit: 50, months: 6, withOdometer: true });
 
   const [tab, setTab] = useState(route.params?.tab || 'overview');
   const [bookings, setBookings] = useState(null);
@@ -129,6 +131,29 @@ export function GarageScreen({ navigation, route }) {
       confirmLabel: 'Sign out',
       onConfirm: logout,
     });
+  }
+
+  // Where each vehicle-intelligence line leads: to the data, or to where it can be added.
+  function handleIntelAction(action) {
+    switch (action.type) {
+      case 'reminders':
+      case 'edit':
+        navigation.navigate('VehicleForm', { mode: 'edit', vehicle });
+        break;
+      case 'service-record':
+        navigation.navigate('ServiceRecordForm', { vehicle });
+        break;
+      case 'expense':
+        navigation.navigate('Expenses', { vehicle });
+        break;
+      case 'cost':
+        setTab('cost');
+        break;
+      case 'timeline':
+        setTab('timeline');
+        break;
+      default:
+    }
   }
 
   function handleRemoveVehicle() {
@@ -209,6 +234,12 @@ export function GarageScreen({ navigation, route }) {
           {tab === 'overview' ? (
             <>
               <FadeIn delay={40}>
+              <View style={styles.viewer}>
+                <VehicleViewer vehicle={vehicle} />
+              </View>
+              <View style={styles.intel}>
+                <VehicleIntelligenceCard data={{ ...insights, loaded: insights.status === 'loaded' }} onAction={handleIntelAction} />
+              </View>
               <View style={styles.card}>
                 <Text style={styles.vehicleName}>{vehicleTitle(vehicle)}</Text>
                 {vehicle.variant ? <Text style={styles.muted}>{vehicle.variant}</Text> : null}
@@ -387,6 +418,8 @@ export function GarageScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg, paddingTop: 16 },
+  viewer: { marginHorizontal: 20, marginBottom: 14 },
+  intel: { marginHorizontal: 20, marginBottom: 14 },
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, marginBottom: 14 },
   heading: { color: colors.textPrimary, fontSize: 28, fontWeight: '700', letterSpacing: -0.6 },
   signOutChip: {
